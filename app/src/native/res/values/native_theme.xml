@@ -1,0 +1,16 @@
+<resources>
+    <style name="NativeTheme" parent="android:style/Theme.DeviceDefault.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowActionModeOverlay">false</item>
+        <item name="android:windowBackground">#FFFFFF</item>
+        <item name="android:colorAccent">#3478F6</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+    <style name="NativePopupMotion">
+        <item name="android:windowEnterAnimation">@anim/popup_enter</item>
+        <item name="android:windowExitAnimation">@anim/popup_exit</item>
+    </style>
+</resources>

@@ -1,0 +1,60 @@
+[
+  {
+    "file": "test_read_format_rar5_stored.rar",
+    "source": "https://raw.githubusercontent.com/libarchive/libarchive/master/libarchive/test/test_read_format_rar5_stored.rar.uu",
+    "sha256": "35d75e315d164d2e329afc28f7d844f013271b4fcffd4ddd78efcdd114a383a7"
+  },
+  {
+    "file": "test_read_format_rar5_compressed.rar",
+    "source": "https://raw.githubusercontent.com/libarchive/libarchive/master/libarchive/test/test_read_format_rar5_compressed.rar.uu",
+    "sha256": "68f9d7e2662cd5bc5607ba9c6bf1edbf121cf3b08011a7d8643091791750a7c8"
+  },
+  {
+    "file": "test_read_format_rar5_multiarchive.part01.rar",
+    "source": "https://raw.githubusercontent.com/libarchive/libarchive/master/libarchive/test/test_read_format_rar5_multiarchive.part01.rar.uu",
+    "bytes": 15360,
+    "sha256": "2f3894dc4b8a1bba90830ef1f89f457b0295b6f9030c70febd57283721bc2ce3"
+  },
+  {
+    "file": "test_read_format_rar5_multiarchive.part02.rar",
+    "source": "https://raw.githubusercontent.com/libarchive/libarchive/master/libarchive/test/test_read_format_rar5_multiarchive.part02.rar.uu",
+    "bytes": 15360,
+    "sha256": "0a5b7a8923beb5747d67f708f17bdc4ebfc8cf2c3010523332e1a1633d7a4c72"
+  },
+  {
+    "file": "test_read_format_rar5_multiarchive.part03.rar",
+    "source": "https://raw.githubusercontent.com/libarchive/libarchive/master/libarchive/test/test_read_format_rar5_multiarchive.part03.rar.uu",
+    "bytes": 15360,
+    "sha256": "31699cbed68297245347911910743c3cb0c6075d28336a7dd4864d4019b8208a"
+  },
+  {
+    "file": "test_read_format_rar5_multiarchive.part04.rar",
+    "source": "https://raw.githubusercontent.com/libarchive/libarchive/master/libarchive/test/test_read_format_rar5_multiarchive.part04.rar.uu",
+    "bytes": 15360,
+    "sha256": "c2d0d72b7c4dd229a944986eee95f802e487e4570e41f7ca7e77b9e82ca4119c"
+  },
+  {
+    "file": "test_read_format_rar5_multiarchive.part05.rar",
+    "source": "https://raw.githubusercontent.com/libarchive/libarchive/master/libarchive/test/test_read_format_rar5_multiarchive.part05.rar.uu",
+    "bytes": 15360,
+    "sha256": "cc69c161ec00e2deeec263fb24f704d1f0d90ccc6b2aeb3baed2539878b5240d"
+  },
+  {
+    "file": "test_read_format_rar5_multiarchive.part06.rar",
+    "source": "https://raw.githubusercontent.com/libarchive/libarchive/master/libarchive/test/test_read_format_rar5_multiarchive.part06.rar.uu",
+    "bytes": 15360,
+    "sha256": "86b7efeacaf2443564220c683eec0880b999dbfe27ae1bc2645f0fffe4646d8c"
+  },
+  {
+    "file": "test_read_format_rar5_multiarchive.part07.rar",
+    "source": "https://raw.githubusercontent.com/libarchive/libarchive/master/libarchive/test/test_read_format_rar5_multiarchive.part07.rar.uu",
+    "bytes": 15360,
+    "sha256": "0b2c9bc7b5679069f9cbe68a9e08351868a3309bf24a5534d8207cf14d41b8b7"
+  },
+  {
+    "file": "test_read_format_rar5_multiarchive.part08.rar",
+    "source": "https://raw.githubusercontent.com/libarchive/libarchive/master/libarchive/test/test_read_format_rar5_multiarchive.part08.rar.uu",
+    "bytes": 9208,
+    "sha256": "b86fa56607d4ee98e0374f84040a0e11ab18bc726a8b772151a1feee9c7045a3"
+  }
+]

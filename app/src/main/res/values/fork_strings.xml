@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="delete_sources_after_verify">Delete originals after verification</string>
+    <string name="delete_sources_explanation">Off by default. Every archive entry is read back and checked against the original SHA-256. Changed files are kept. Deletion is permanent.</string>
+    <string name="archive_busy">An archive task is already running. Please wait.</string>
+    <string name="archive_some_retained">Archive verified. %1$d source items were retained because they changed or could not be deleted.</string>
+    <string name="archive_deleted_sources">Archive verified; originals deleted.</string>
+    <string name="archive_verified">Archive verified; originals kept.</string>
+    <string name="archive_cancelled_retained">Cancelled. Remaining originals were kept. Completed archives, if any, remain in the output folder.</string>
+    <string name="archive_failure_retained">Originals not yet deleted were retained.</string>
+</resources>

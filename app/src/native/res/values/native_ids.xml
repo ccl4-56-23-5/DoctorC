@@ -1,0 +1,16 @@
+<resources>
+    <item name="native_search_dock" type="id"/>
+    <item name="native_modal_host" type="id"/><item name="native_modal_dim" type="id"/>
+    <item name="native_dock_host" type="id"/><item name="file_info_panel" type="id"/><item name="file_info_name" type="id"/><item name="file_info_location" type="id"/><item name="file_info_close" type="id"/><item name="media_duration" type="id"/>
+    <item name="native_dock_selector" type="id"/><item name="native_page_motion" type="id"/>
+    <item name="native_menu_anchor" type="id"/><item name="native_popup_panel" type="id"/>
+    <item name="native_breadcrumbs" type="id"/>
+    <item name="native_list" type="id"/><item name="native_header" type="id"/><item name="native_top_fade" type="id"/>
+    <item name="native_compact_title" type="id"/><item name="native_dock" type="id"/><item name="native_large_title" type="id"/>
+    <item name="file_row" type="id"/><item name="file_title" type="id"/><item name="file_subtitle" type="id"/><item name="file_trailing" type="id"/>
+    <item name="create_archive" type="id"/><item name="archive_name" type="id"/><item name="archive_path" type="id"/>
+    <item name="archive_format_7z" type="id"/><item name="archive_format_zip" type="id"/><item name="archive_format_tar" type="id"/>
+    <item name="archive_password_toggle" type="id"/><item name="archive_password" type="id"/><item name="archive_split_toggle" type="id"/>
+    <item name="archive_split_mb" type="id"/><item name="archive_delete" type="id"/><item name="archive_start" type="id"/>
+    <item name="picker_path" type="id"/><item name="picker_choose" type="id"/><item name="task_banner" type="id"/>
+</resources>

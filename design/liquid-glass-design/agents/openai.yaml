@@ -1,0 +1,4 @@
+interface:
+  display_name: "液态玻璃设计"
+  short_description: "设计并验证兼顾可读性、背景折射、前景清晰和连续非线性动效的液态玻璃界面"
+  default_prompt: "使用 $liquid-glass-design 调整当前界面的液态玻璃，并检查背景模糊、文字清晰度与连续变形动效。"

@@ -1,0 +1,572 @@
+[
+  {
+    "name": "all",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      1,
+      0,
+      0,
+      0
+    ],
+    "sha256": "D07FD66A0C74FED84DD3A4DB796920C0D0B0F7BC364C2F594A5609CDB4411C0A",
+    "packaged_size": 192
+  },
+  {
+    "name": "apk",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "AD2AA3485CC2DF6E546E083145A4EBCCBCE27E2300E8620137B0EA9158A06592",
+    "packaged_size": 192
+  },
+  {
+    "name": "archive",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "EE34D7BB06725CBB36CA1073CE25B6399EB9826E461974AC38C4E27A8FE18D3A",
+    "packaged_size": 192
+  },
+  {
+    "name": "back",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "9F29B0C7984FB9EE2150F08F2F6E01AA07940336CECAD5DE3BCD9E5592CC239A",
+    "packaged_size": 192
+  },
+  {
+    "name": "browse",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "3B239F1DD6A5C1D9FAC3CEEA94C87BC3E6D38C0CAD97DD39F643A8D847C2AE74",
+    "packaged_size": 192
+  },
+  {
+    "name": "check",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "7F7638DA5FBC170F13E5A9B39A02884429CC865C3F204D7F4E76A5B1E2F38417",
+    "packaged_size": 192
+  },
+  {
+    "name": "chevron",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "C5F9CD33261F7F22CC522333C7D5EAC05374CA9AE0AB82825091DDC317755F3D",
+    "packaged_size": 192
+  },
+  {
+    "name": "circle",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "CA02FD79B87DC3121BF15742BC6930A5FC87FDB0BE7DC6451620FCB51E1B16DC",
+    "packaged_size": 192
+  },
+  {
+    "name": "close",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "87F72EBB7E86E4DDC4153FFEE088D295929ED10EA248F53181F001A942B14ADD",
+    "packaged_size": 192
+  },
+  {
+    "name": "compress",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "802F8038EB16B5DEFD79B90769C41A8D933269193BF38BF339BCF25A4070D2D1",
+    "packaged_size": 192
+  },
+  {
+    "name": "copy",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "B9B60FDD870796B19519C4AB073734D11A2A9915BC90B803474EF8D05161713D",
+    "packaged_size": 192
+  },
+  {
+    "name": "delete",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      1,
+      0,
+      0,
+      0
+    ],
+    "sha256": "C8736EBA26FF4E468E59843E9589F9439058D7B9AF0B387F0899D93087C93C9A",
+    "packaged_size": 192
+  },
+  {
+    "name": "document",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "F157C0F7B5B4F11C3A36C5B012365783660908CB0780B823C82897F1351589AF",
+    "packaged_size": 192
+  },
+  {
+    "name": "download",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "7A9232C82DD3162D8C0F4CB122B859DAF589159157D2115759B91ED3AC149111",
+    "packaged_size": 192
+  },
+  {
+    "name": "extract",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "A99E263A6F267F30C7A5A661C4597B2BA336FB600390149CC51C17AD00C2DA92",
+    "packaged_size": 192
+  },
+  {
+    "name": "eye",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "439B6A0444CF8A3CC797638252A0985BDD22A7B1966B3CCFB38EDE0CBF40469F",
+    "packaged_size": 192
+  },
+  {
+    "name": "favorite",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "30F4D2B10691AAB4BB02DA78CC5CCCD22D540AD005183953E57034D8E955A67E",
+    "packaged_size": 192
+  },
+  {
+    "name": "folder",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "4102C62BF93424DFAF1A97B151D549423216023642ECAEDAECA1162A6E135D1F",
+    "packaged_size": 192
+  },
+  {
+    "name": "image",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "AF581A328345C5BAA91DAD050C8D83A5D07BB0FA9CD5871046072CD45144B01B",
+    "packaged_size": 192
+  },
+  {
+    "name": "more",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "9C033046A2AB6B3BB7162854B8DD8345ED78C800C2F2E366D691F9CD5B804749",
+    "packaged_size": 192
+  },
+  {
+    "name": "move",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "F0F9FBD621A24923768E156A0D1D1402702F72181C3F3B784F9808F7D193BEB8",
+    "packaged_size": 192
+  },
+  {
+    "name": "music",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "34425D7ECFE20E27A2EEF345AA2323BD6255BED3B9C29C01756E50DE392003A3",
+    "packaged_size": 192
+  },
+  {
+    "name": "newfolder",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "AB63BE5A5CAE72179FAD3928365771A10520B49D1C84967EEF3D9C011488FBCB",
+    "packaged_size": 192
+  },
+  {
+    "name": "notification",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "B45C7EA27E41B061D3D41226BA7A3435A76E49AD3460803FF18E2DCC35621551",
+    "packaged_size": 96
+  },
+  {
+    "name": "phone",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "054033888A0ED6FDA4297841C30B0492560552F37EEC1E324F5F6FB959213E82",
+    "packaged_size": 192
+  },
+  {
+    "name": "recent",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "0E56F4B98D6F39DBF7AFA845F1E8B5D5C74BD712F5FB8281766D342AC30D34C8",
+    "packaged_size": 192
+  },
+  {
+    "name": "search",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "5B8D685FC0447392F54AECA77A2CCE8757B27A198341BDE3F9486AA0C011C202",
+    "packaged_size": 192
+  },
+  {
+    "name": "sort",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "66C2896B5B5F15D9C7C066BD79C68EC412891F3B009582FAAED7EE109944EB12",
+    "packaged_size": 192
+  },
+  {
+    "name": "video",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "5E9C30576F687307366B316AA60FB341EA9C618EAF9D5E0F82F04F1AC93A5297",
+    "packaged_size": 192
+  },
+  {
+    "name": "play",
+    "original_size": [
+      1254,
+      1254
+    ],
+    "alpha_range": [
+      0,
+      255
+    ],
+    "corner_alpha": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "sha256": "C6EDFE148775EFCEC8EC5BB4A3334E68859823AE7102D705C082319D8A6C203F",
+    "packaged_size": 192
+  }
+]

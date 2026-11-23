@@ -1,0 +1,1 @@
+ZipDoctorC is now FileDoctorC. The bottom dock uses liquid glass. Local transfers support folder trees, including empty folders, and batches larger than 256 items between updated devices.
