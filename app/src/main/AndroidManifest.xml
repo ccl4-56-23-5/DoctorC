@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
+    <queries><package android:name="local.sevenzip.android"/></queries>
+    <application android:label="MookDoctorC" android:icon="@mipmap/ic_mookdoctor"
+        android:allowBackup="false" android:dataExtractionRules="@xml/no_data_transfer" android:enableOnBackInvokedCallback="true" android:usesCleartextTraffic="false"
+        android:theme="@style/BookDoctorTheme">
+        <service android:name=".AudioMediaService" android:exported="false"
+            android:foregroundServiceType="mediaPlayback"/>
+        <provider android:name="androidx.core.content.FileProvider"
+            android:authorities="local.bookdoctorc.files" android:exported="false" android:grantUriPermissions="true">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/bookdoctor_transfer_paths"/>
+        </provider>
+        <provider android:name=".ModuleTransferProvider"
+            android:authorities="local.bookdoctorc.transfer" android:exported="false" android:grantUriPermissions="true">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/bookdoctor_handoff_paths"/>
+        </provider>
+        <activity android:name=".MainActivity" android:exported="true" android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:scheme="content" android:mimeType="application/vnd.bookdoctorc.migration+zip"/>
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

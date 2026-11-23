@@ -1,0 +1,24 @@
+<resources>
+    <style name="BookDoctorTheme" parent="android:style/Theme.DeviceDefault.Light.NoActionBar">
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:colorAccent">#805137</item>
+        <item name="android:windowBackground">#F8EFE1</item>
+        <item name="android:fontFamily">sans</item>
+    </style>
+    <style name="BookDialogDay" parent="android:style/Theme.DeviceDefault.Light.Dialog.Alert">
+        <item name="android:windowBackground">@drawable/dialog_day</item>
+        <item name="android:colorAccent">#805137</item>
+        <item name="android:colorBackgroundFloating">#FFF2DF</item>
+        <item name="android:fontFamily">sans</item>
+    </style>
+    <style name="BookDialogNight" parent="android:style/Theme.DeviceDefault.Dialog.Alert">
+        <item name="android:windowBackground">@drawable/dialog_night</item>
+        <item name="android:colorAccent">#E9C595</item>
+        <item name="android:colorBackgroundFloating">#43352B</item>
+        <item name="android:fontFamily">sans</item>
+    </style>
+    <style name="BookMenuMotion">
+        <item name="android:windowEnterAnimation">@anim/book_menu_enter</item>
+        <item name="android:windowExitAnimation">@anim/book_menu_exit</item>
+    </style>
+</resources>
