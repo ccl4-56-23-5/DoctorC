@@ -1,0 +1,7 @@
+FileDoctorC is an Android file manager with archive tools and local network transfer.
+
+Browse files by folder or type, search, copy, move and batch rename. Open ZIP, 7z, RAR, TAR and other archives, and create ZIP, 7z and TAR archives.
+
+Send files and folders to another device running FileDoctorC on the same local network. Folder transfers preserve subfolders and empty folders. The receiver selects the save directory before accepting.
+
+FileDoctorC is derived from ZipXtract and is licensed under the GNU General Public License.

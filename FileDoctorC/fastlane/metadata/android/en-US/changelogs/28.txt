@@ -1,0 +1,1 @@
+Removes the standalone Android shortcut. Open Android from the internal storage list. On compatible systems, Android/data and Android/obb can be browsed and files copied without a companion app or wireless debugging.

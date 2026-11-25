@@ -1,0 +1,1 @@
+ZipDoctorC's 25th release is now named 1.1.0+25. The features and LAN protocol are unchanged from 1.0.24.

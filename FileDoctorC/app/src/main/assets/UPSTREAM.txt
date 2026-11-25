@@ -1,0 +1,13 @@
+FileDoctorC (formerly ZipDoctorC)
+Unofficial derivative of WirelessAlien/ZipXtract v7.1.1
+https://github.com/WirelessAlien/ZipXtract
+Upstream commit c137bc1e07e8bea89f13dc26a938fd35df62918c
+License: GPL-3.0-or-later
+7-Zip-JBinding-4Android Release-16.02-2.03: LGPL-2.1 and unRAR restriction
+Not affiliated with the 7-Zip project.
+
+Liquid glass lens model adapted from QWEA0/Liquid-Glass-Android
+https://github.com/QWEA0/Liquid-Glass-Android
+Commit: 16afe4d8b5d08a370d3f8c50b08d7f5c6eb5da4d
+MIT Copyright (c) 2025-2026 pandadog. See LiquidGlass-MIT.txt.
+Android View GPU background refraction adaptation; no upstream JNI/Compose/Material modules included.

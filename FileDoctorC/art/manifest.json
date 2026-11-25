@@ -1,0 +1,327 @@
+[
+  {
+    "name": "launcher",
+    "file": "generated/launcher.png",
+    "builtin_output": "exec-df7a9350-3d5c-4c6e-8c59-0cd2e37ec126.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: logo-brand. Production Android archive/file-manager illustration. Style: polished flat illustration with just a little physical depth, like premium Xiaomi/HyperOS file-manager artwork: mostly front facing, crisp broad silhouettes, restrained two-tone shading, a tiny bevel and soft top-left highlight, no heavy 3D, no plastic toy, no clay, no glass, no photorealism. No text, letters, watermark, scene, frame or platform brand. Visually clear at 40dp. Create one distinctive app icon for an archive manager: a cobalt-blue archive case with a precise pale ivory zipper running down the center, a small warm amber top edge representing layered files. Entire composition on a full-bleed very pale icy-blue square background; emblem centered and occupies only central 55% of canvas so Android adaptive masking cannot crop it. Compact bold friendly silhouette, subtly layered surfaces; no separate rounded-square border. Square high-resolution polished final app-logo asset.",
+    "edit_reference": [],
+    "transparent_background": false,
+    "superseded_initial_prompt": null
+  },
+  {
+    "name": "folder",
+    "file": "generated/folder.png",
+    "builtin_output": "exec-00ed75ad-5bb7-4fd7-b2ad-d9373d936a3a.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: logo-brand. Production Android archive/file-manager illustration. Style: polished flat illustration with just a little physical depth, like premium Xiaomi/HyperOS file-manager artwork: mostly front facing, crisp broad silhouettes, restrained two-tone shading, a tiny bevel and soft top-left highlight, no heavy 3D, no plastic toy, no clay, no glass, no photorealism. No text, letters, watermark, scene, frame or platform brand. Visually clear at 40dp. Create exactly one yellow file-folder icon, isolated on a truly transparent background. Broad golden-yellow front panel with tiny tab at upper left, a narrow ivory paper lip at top, warm orange edge and subtle inner panel highlight. Almost front view, only very slight depth on lower/right edge; shape occupies central 82% of square canvas, ample transparent margin. File-folder silhouette must be immediately recognizable. Soft tiny contact shadow only, no square app tile.",
+    "edit_reference": [],
+    "transparent_background": true,
+    "superseded_initial_prompt": null
+  },
+  {
+    "name": "archive",
+    "file": "generated/archive.png",
+    "builtin_output": "exec-aef6366a-553b-46b2-8854-c1eedf3a0e14.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: logo-brand. Production Android archive/file-manager illustration. Style: polished flat illustration with just a little physical depth, like premium Xiaomi/HyperOS file-manager artwork: mostly front facing, crisp broad silhouettes, restrained two-tone shading, a tiny bevel and soft top-left highlight, no heavy 3D, no plastic toy, no clay, no glass, no photorealism. No text, letters, watermark, scene, frame or platform brand. Visually clear at 40dp. Create exactly one blue compressed archive file icon isolated on a truly transparent background. Cobalt-blue upright archive case with softly rounded corners and a pale ivory zipper down the middle, a small amber zipper pull, subtle lighter top edge. Front facing and restrained depth, centered at 78% of square canvas. No square tile behind the archive object, no text such as ZIP, no stacks floating around it.",
+    "edit_reference": [],
+    "transparent_background": true,
+    "superseded_initial_prompt": null
+  },
+  {
+    "name": "document",
+    "file": "generated/document.png",
+    "builtin_output": "exec-0a39015c-d5f4-4241-82c4-26ab4f2b39a0.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: logo-brand. Asset type: one final production Android file-manager icon. Style: premium HyperOS-like mostly flat illustration with a hint of physical thickness, crisp broad silhouette, restrained two-tone shading and tiny top-left bevel highlight. No heavy 3D or perspective, no clay, plastic toy, glass, photograph, rainbow glow or dramatic shadow. Exactly one centered subject on a genuinely transparent square background, occupying central 80% of canvas with safe transparent margins. No words, letters, watermark, scene, border, sample grid or surrounding app tile. Clear at 24–40dp. An amber-yellow document page, rounded lower corners, small ivory folded top-right corner and three short ivory embossed text marks; a single page silhouette with restrained front-facing depth, no app tile.",
+    "edit_reference": [],
+    "transparent_background": true,
+    "superseded_initial_prompt": null
+  },
+  {
+    "name": "image",
+    "file": "generated/image.png",
+    "builtin_output": "exec-ff869252-2366-4fb8-a6ba-24630dd20dec.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: background-extraction. Input image is the edit target. Keep the purple photo-document object and its ivory mountain-and-sun symbol unchanged. Remove ALL glow, white-gray background, mist, colored speckles and shadows outside the exact silhouette. Make the entire area outside the purple object's crisp boundary genuinely fully transparent. No halo, no cast shadow, no speckles, no replacement backdrop. Preserve clean antialiased alpha only at the immediate object edge.",
+    "edit_reference": [
+      "exec-8d2892f2-21ef-4522-b918-772c5c29aec1.png"
+    ],
+    "transparent_background": true,
+    "superseded_initial_prompt": "Use case: logo-brand. Asset type: one final production Android file-manager icon. Style: premium HyperOS-like mostly flat illustration with a hint of physical thickness, crisp broad silhouette, restrained two-tone shading and tiny top-left bevel highlight. No heavy 3D or perspective, no clay, plastic toy, glass, photograph, rainbow glow or dramatic shadow. Exactly one centered subject on a genuinely transparent square background, occupying central 80% of canvas with safe transparent margins. No words, letters, watermark, scene, border, sample grid or surrounding app tile. Clear at 24–40dp. A violet-purple rounded photo print with a very simple ivory mountain-and-sun emblem inset into the face, almost flat with a subtly raised rim. One isolated photo-file icon."
+  },
+  {
+    "name": "video",
+    "file": "generated/video.png",
+    "builtin_output": "exec-2ab4566e-f523-45b7-9b1b-ea98839ec9a3.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: logo-brand. Asset type: one final production Android file-manager icon. Style: premium HyperOS-like mostly flat illustration with a hint of physical thickness, crisp broad silhouette, restrained two-tone shading and tiny top-left bevel highlight. No heavy 3D or perspective, no clay, plastic toy, glass, photograph, rainbow glow or dramatic shadow. Exactly one centered subject on a genuinely transparent square background, occupying central 80% of canvas with safe transparent margins. No words, letters, watermark, scene, border, sample grid or surrounding app tile. Clear at 24–40dp. A violet-purple compact video-file tile with a simple ivory video-camera symbol, mildly raised top-left surface. One isolated recognizable video-file icon.",
+    "edit_reference": [],
+    "transparent_background": true,
+    "superseded_initial_prompt": null
+  },
+  {
+    "name": "music",
+    "file": "generated/music.png",
+    "builtin_output": "exec-6c7769ed-9fd1-464a-b774-9a9c3e2ee4ca.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: logo-brand. Asset type: one final production Android file-manager icon. Style: premium HyperOS-like mostly flat illustration with a hint of physical thickness, crisp broad silhouette, restrained two-tone shading and tiny top-left bevel highlight. No heavy 3D or perspective, no clay, plastic toy, glass, photograph, rainbow glow or dramatic shadow. Exactly one centered subject on a genuinely transparent square background, occupying central 80% of canvas with safe transparent margins. No words, letters, watermark, scene, border, sample grid or surrounding app tile. Clear at 24–40dp. A coral-red rounded music-file tile with one ivory musical note, flat with a tiny raised highlight at the edge. One isolated music-file icon.",
+    "edit_reference": [],
+    "transparent_background": true,
+    "superseded_initial_prompt": null
+  },
+  {
+    "name": "apk",
+    "file": "generated/apk.png",
+    "builtin_output": "exec-9964c100-a419-4aa8-894d-852767a32346.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: logo-brand. Asset type: one final production Android file-manager icon. Style: premium HyperOS-like mostly flat illustration with a hint of physical thickness, crisp broad silhouette, restrained two-tone shading and tiny top-left bevel highlight. No heavy 3D or perspective, no clay, plastic toy, glass, photograph, rainbow glow or dramatic shadow. Exactly one centered subject on a genuinely transparent square background, occupying central 80% of canvas with safe transparent margins. No words, letters, watermark, scene, border, sample grid or surrounding app tile. Clear at 24–40dp. A fresh green rounded installer-package icon with an ivory friendly robot-head/install symbol, front facing and barely raised. One isolated Android-installation-file icon, no lettering or official brand word.",
+    "edit_reference": [],
+    "transparent_background": true,
+    "superseded_initial_prompt": null
+  },
+  {
+    "name": "extract",
+    "file": "generated/extract.png",
+    "builtin_output": "exec-37caec0a-75d8-4e6c-9846-d631c16addb9.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: logo-brand. Asset type: one final production Android file-manager icon. Style: premium HyperOS-like mostly flat illustration with a hint of physical thickness, crisp broad silhouette, restrained two-tone shading and tiny top-left bevel highlight. No heavy 3D or perspective, no clay, plastic toy, glass, photograph, rainbow glow or dramatic shadow. Exactly one centered subject on a genuinely transparent square background, occupying central 80% of canvas with safe transparent margins. No words, letters, watermark, scene, border, sample grid or surrounding app tile. Clear at 24–40dp. A pale blue open archive case with a small amber outward/downward arrow and one ivory document emerging; a very simple legible extraction action, no tiny separate objects.",
+    "edit_reference": [],
+    "transparent_background": true,
+    "superseded_initial_prompt": null
+  },
+  {
+    "name": "back",
+    "file": "generated/back.png",
+    "builtin_output": "exec-1d8bf00d-6522-4d6f-8d6e-cd2ef57dd278.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: logo-brand. Asset type: one final production Android file-manager icon. Style: premium HyperOS-like mostly flat illustration with a hint of physical thickness, crisp broad silhouette, restrained two-tone shading and tiny top-left bevel highlight. No heavy 3D or perspective, no clay, plastic toy, glass, photograph, rainbow glow or dramatic shadow. Exactly one centered subject on a genuinely transparent square background, occupying central 80% of canvas with safe transparent margins. No words, letters, watermark, scene, border, sample grid or surrounding app tile. Clear at 24–40dp. Monochrome dark graphite/near-black navigation glyph, calm and neutral, tiny raised edge rather than a line drawing, minimal internal detail. A broad clean left-facing chevron/back arrow, two connected solid arms, balanced open shape.",
+    "edit_reference": [],
+    "transparent_background": true,
+    "superseded_initial_prompt": null
+  },
+  {
+    "name": "close",
+    "file": "generated/close.png",
+    "builtin_output": "exec-c2f39363-d2d2-42f0-a3c5-bce27a8dad1d.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: logo-brand. Asset type: one final production Android file-manager icon. Style: premium HyperOS-like mostly flat illustration with a hint of physical thickness, crisp broad silhouette, restrained two-tone shading and tiny top-left bevel highlight. No heavy 3D or perspective, no clay, plastic toy, glass, photograph, rainbow glow or dramatic shadow. Exactly one centered subject on a genuinely transparent square background, occupying central 80% of canvas with safe transparent margins. No words, letters, watermark, scene, border, sample grid or surrounding app tile. Clear at 24–40dp. Monochrome dark graphite/near-black navigation glyph, calm and neutral, tiny raised edge rather than a line drawing, minimal internal detail. A balanced solid multiplication-shaped X with gently rounded terminals, for dismissing a panel.",
+    "edit_reference": [],
+    "transparent_background": true,
+    "superseded_initial_prompt": null
+  },
+  {
+    "name": "search",
+    "file": "generated/search.png",
+    "builtin_output": "exec-2c2d14d2-45fc-467b-b573-4730ee4e0518.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: logo-brand. Asset type: one final production Android file-manager icon. Style: premium HyperOS-like mostly flat illustration with a hint of physical thickness, crisp broad silhouette, restrained two-tone shading and tiny top-left bevel highlight. No heavy 3D or perspective, no clay, plastic toy, glass, photograph, rainbow glow or dramatic shadow. Exactly one centered subject on a genuinely transparent square background, occupying central 80% of canvas with safe transparent margins. No words, letters, watermark, scene, border, sample grid or surrounding app tile. Clear at 24–40dp. Monochrome dark graphite/near-black navigation glyph, calm and neutral, tiny raised edge rather than a line drawing, minimal internal detail. A clean magnifying glass with a generous open lens center and thick solid handle angled down-right.",
+    "edit_reference": [],
+    "transparent_background": true,
+    "superseded_initial_prompt": null
+  },
+  {
+    "name": "more",
+    "file": "generated/more.png",
+    "builtin_output": "exec-e9b691b2-f4d0-448a-9264-352a53741435.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: precise-object-edit. Input image is the edit target and the reference for clean edges. Replace its back-arrow subject completely with the requested standalone generic UI control glyph. Preserve its transparent empty background and understated slightly raised finish. This is a control symbol, NOT a file-manager illustration. No folder, document, card, app tile, frame, container, shadow, glow, halo, scene, text or additional objects. Center the requested symbol at 75% of the square canvas. Exactly three small round dark graphite dots in one vertical column with equal spacing; NOTHING ELSE.",
+    "edit_reference": [
+      "exec-1d8bf00d-6522-4d6f-8d6e-cd2ef57dd278.png"
+    ],
+    "transparent_background": true,
+    "superseded_initial_prompt": "Use case: logo-brand. Asset type: one final production Android file-manager icon. Style: premium HyperOS-like mostly flat illustration with a hint of physical thickness, crisp broad silhouette, restrained two-tone shading and tiny top-left bevel highlight. No heavy 3D or perspective, no clay, plastic toy, glass, photograph, rainbow glow or dramatic shadow. Exactly one centered subject on a genuinely transparent square background, occupying central 80% of canvas with safe transparent margins. No words, letters, watermark, scene, border, sample grid or surrounding app tile. Clear at 24–40dp. Monochrome dark graphite/near-black navigation glyph, calm and neutral, tiny raised edge rather than a line drawing, minimal internal detail. Exactly three round solid vertical dots, evenly spaced, for an overflow menu."
+  },
+  {
+    "name": "sort",
+    "file": "generated/sort.png",
+    "builtin_output": "exec-ecda5246-3304-44fa-824a-f1bab4e0c91f.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: precise-object-edit. Input image is the edit target and the reference for clean edges. Replace its back-arrow subject completely with the requested standalone generic UI control glyph. Preserve its transparent empty background and understated slightly raised finish. This is a control symbol, NOT a file-manager illustration. No folder, document, card, app tile, frame, container, shadow, glow, halo, scene, text or additional objects. Center the requested symbol at 75% of the square canvas. Exactly three horizontal dark graphite slider rails with a circular knob on each. NOTHING ELSE.",
+    "edit_reference": [
+      "exec-1d8bf00d-6522-4d6f-8d6e-cd2ef57dd278.png"
+    ],
+    "transparent_background": true,
+    "superseded_initial_prompt": "Use case: logo-brand. Asset type: one final production Android file-manager icon. Style: premium HyperOS-like mostly flat illustration with a hint of physical thickness, crisp broad silhouette, restrained two-tone shading and tiny top-left bevel highlight. No heavy 3D or perspective, no clay, plastic toy, glass, photograph, rainbow glow or dramatic shadow. Exactly one centered subject on a genuinely transparent square background, occupying central 80% of canvas with safe transparent margins. No words, letters, watermark, scene, border, sample grid or surrounding app tile. Clear at 24–40dp. Monochrome dark graphite/near-black navigation glyph, calm and neutral, tiny raised edge rather than a line drawing, minimal internal detail. Three short parallel horizontal slider rails with one round thumb per rail at alternating positions, readable as sorting/settings."
+  },
+  {
+    "name": "newfolder",
+    "file": "generated/newfolder.png",
+    "builtin_output": "exec-a30caca7-0a8c-4827-b464-55ea58db2c1b.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: logo-brand. Asset type: one final production Android file-manager icon. Style: premium HyperOS-like mostly flat illustration with a hint of physical thickness, crisp broad silhouette, restrained two-tone shading and tiny top-left bevel highlight. No heavy 3D or perspective, no clay, plastic toy, glass, photograph, rainbow glow or dramatic shadow. Exactly one centered subject on a genuinely transparent square background, occupying central 80% of canvas with safe transparent margins. No words, letters, watermark, scene, border, sample grid or surrounding app tile. Clear at 24–40dp. Monochrome dark graphite/near-black navigation glyph, calm and neutral, tiny raised edge rather than a line drawing, minimal internal detail. A compact file-folder silhouette with one clearly visible inset plus sign; folder tab at upper left.",
+    "edit_reference": [],
+    "transparent_background": true,
+    "superseded_initial_prompt": null
+  },
+  {
+    "name": "all",
+    "file": "generated/all.png",
+    "builtin_output": "exec-06e6900e-178f-44f3-8da3-8688e1e3f036.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: precise-object-edit. Input image is the edit target and the reference for clean edges. Replace its back-arrow subject completely with the requested standalone generic UI control glyph. Preserve its transparent empty background and understated slightly raised finish. This is a control symbol, NOT a file-manager illustration. No folder, document, card, app tile, frame, container, shadow, glow, halo, scene, text or additional objects. Center the requested symbol at 75% of the square canvas. Exactly two dark graphite check marks, side by side. NOTHING ELSE.",
+    "edit_reference": [
+      "exec-1d8bf00d-6522-4d6f-8d6e-cd2ef57dd278.png"
+    ],
+    "transparent_background": true,
+    "superseded_initial_prompt": "Use case: logo-brand. Asset type: one final production Android file-manager icon. Style: premium HyperOS-like mostly flat illustration with a hint of physical thickness, crisp broad silhouette, restrained two-tone shading and tiny top-left bevel highlight. No heavy 3D or perspective, no clay, plastic toy, glass, photograph, rainbow glow or dramatic shadow. Exactly one centered subject on a genuinely transparent square background, occupying central 80% of canvas with safe transparent margins. No words, letters, watermark, scene, border, sample grid or surrounding app tile. Clear at 24–40dp. Monochrome dark graphite/near-black navigation glyph, calm and neutral, tiny raised edge rather than a line drawing, minimal internal detail. Two clean check marks side by side and slightly overlapped, a select-all command, generous open spacing."
+  },
+  {
+    "name": "chevron",
+    "file": "generated/chevron.png",
+    "builtin_output": "exec-e858307d-25a8-4097-9621-90c8eca8759c.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: precise-object-edit. Input image is the edit target and the reference for clean edges. Replace its back-arrow subject completely with the requested standalone generic UI control glyph. Preserve its transparent empty background and understated slightly raised finish. This is a control symbol, NOT a file-manager illustration. No folder, document, card, app tile, frame, container, shadow, glow, halo, scene, text or additional objects. Center the requested symbol at 75% of the square canvas. Exactly one right-pointing dark graphite chevron. NOTHING ELSE.",
+    "edit_reference": [
+      "exec-1d8bf00d-6522-4d6f-8d6e-cd2ef57dd278.png"
+    ],
+    "transparent_background": true,
+    "superseded_initial_prompt": "Use case: logo-brand. Asset type: one final production Android file-manager icon. Style: premium HyperOS-like mostly flat illustration with a hint of physical thickness, crisp broad silhouette, restrained two-tone shading and tiny top-left bevel highlight. No heavy 3D or perspective, no clay, plastic toy, glass, photograph, rainbow glow or dramatic shadow. Exactly one centered subject on a genuinely transparent square background, occupying central 80% of canvas with safe transparent margins. No words, letters, watermark, scene, border, sample grid or surrounding app tile. Clear at 24–40dp. Monochrome dark graphite/near-black navigation glyph, calm and neutral, tiny raised edge rather than a line drawing, minimal internal detail. A small right-facing chevron with broad smooth arms, for opening the next folder or setting."
+  },
+  {
+    "name": "copy",
+    "file": "generated/copy.png",
+    "builtin_output": "exec-c10ab697-0e57-4fc1-bb21-92825bdeb8bc.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: logo-brand. Asset type: one final production Android file-manager icon. Style: premium HyperOS-like mostly flat illustration with a hint of physical thickness, crisp broad silhouette, restrained two-tone shading and tiny top-left bevel highlight. No heavy 3D or perspective, no clay, plastic toy, glass, photograph, rainbow glow or dramatic shadow. Exactly one centered subject on a genuinely transparent square background, occupying central 80% of canvas with safe transparent margins. No words, letters, watermark, scene, border, sample grid or surrounding app tile. Clear at 24–40dp. Monochrome dark graphite/near-black navigation glyph, calm and neutral, tiny raised edge rather than a line drawing, minimal internal detail. Two overlapping document-page silhouettes, the front page offset down-right, minimal clean open inset.",
+    "edit_reference": [],
+    "transparent_background": true,
+    "superseded_initial_prompt": null
+  },
+  {
+    "name": "move",
+    "file": "generated/move.png",
+    "builtin_output": "exec-7218c01c-fa03-4a3c-8265-79cec725dbcc.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: logo-brand. Asset type: one final production Android file-manager icon. Style: premium HyperOS-like mostly flat illustration with a hint of physical thickness, crisp broad silhouette, restrained two-tone shading and tiny top-left bevel highlight. No heavy 3D or perspective, no clay, plastic toy, glass, photograph, rainbow glow or dramatic shadow. Exactly one centered subject on a genuinely transparent square background, occupying central 80% of canvas with safe transparent margins. No words, letters, watermark, scene, border, sample grid or surrounding app tile. Clear at 24–40dp. Monochrome dark graphite/near-black navigation glyph, calm and neutral, tiny raised edge rather than a line drawing, minimal internal detail. A simple rightward arrow emerging from a compact folder, clearly showing move-to-folder action.",
+    "edit_reference": [],
+    "transparent_background": true,
+    "superseded_initial_prompt": null
+  },
+  {
+    "name": "delete",
+    "file": "generated/delete.png",
+    "builtin_output": "exec-023f0a04-91f9-4484-857a-8c75a51e7c33.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: logo-brand. Asset type: one final production Android file-manager icon. Style: premium HyperOS-like mostly flat illustration with a hint of physical thickness, crisp broad silhouette, restrained two-tone shading and tiny top-left bevel highlight. No heavy 3D or perspective, no clay, plastic toy, glass, photograph, rainbow glow or dramatic shadow. Exactly one centered subject on a genuinely transparent square background, occupying central 80% of canvas with safe transparent margins. No words, letters, watermark, scene, border, sample grid or surrounding app tile. Clear at 24–40dp. Monochrome dark graphite/near-black navigation glyph, calm and neutral, tiny raised edge rather than a line drawing, minimal internal detail. A simple lidded waste-bin silhouette with two slim light inset grooves, no recycling arrows.",
+    "edit_reference": [],
+    "transparent_background": true,
+    "superseded_initial_prompt": null
+  },
+  {
+    "name": "eye",
+    "file": "generated/eye.png",
+    "builtin_output": "exec-2d461831-1ecf-4d06-b9e9-cebb26fe5398.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: logo-brand. Asset type: one final production Android file-manager icon. Style: premium HyperOS-like mostly flat illustration with a hint of physical thickness, crisp broad silhouette, restrained two-tone shading and tiny top-left bevel highlight. No heavy 3D or perspective, no clay, plastic toy, glass, photograph, rainbow glow or dramatic shadow. Exactly one centered subject on a genuinely transparent square background, occupying central 80% of canvas with safe transparent margins. No words, letters, watermark, scene, border, sample grid or surrounding app tile. Clear at 24–40dp. Monochrome dark graphite/near-black navigation glyph, calm and neutral, tiny raised edge rather than a line drawing, minimal internal detail. An open eye shape with a centered round pupil and generous transparent gap around the pupil, password visibility.",
+    "edit_reference": [],
+    "transparent_background": true,
+    "superseded_initial_prompt": null
+  },
+  {
+    "name": "phone",
+    "file": "generated/phone.png",
+    "builtin_output": "exec-93eddeba-ab44-4248-82e4-8593197f874f.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: logo-brand. Asset type: one final production Android file-manager icon. Style: premium HyperOS-like mostly flat illustration with a hint of physical thickness, crisp broad silhouette, restrained two-tone shading and tiny top-left bevel highlight. No heavy 3D or perspective, no clay, plastic toy, glass, photograph, rainbow glow or dramatic shadow. Exactly one centered subject on a genuinely transparent square background, occupying central 80% of canvas with safe transparent margins. No words, letters, watermark, scene, border, sample grid or surrounding app tile. Clear at 24–40dp. Monochrome dark graphite/near-black navigation glyph, calm and neutral, tiny raised edge rather than a line drawing, minimal internal detail. An upright smartphone silhouette with a large open transparent screen and small light home bar.",
+    "edit_reference": [],
+    "transparent_background": true,
+    "superseded_initial_prompt": null
+  },
+  {
+    "name": "download",
+    "file": "generated/download.png",
+    "builtin_output": "exec-83f6034f-228e-4428-8621-5ac8612ae809.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: logo-brand. Asset type: one final production Android file-manager icon. Style: premium HyperOS-like mostly flat illustration with a hint of physical thickness, crisp broad silhouette, restrained two-tone shading and tiny top-left bevel highlight. No heavy 3D or perspective, no clay, plastic toy, glass, photograph, rainbow glow or dramatic shadow. Exactly one centered subject on a genuinely transparent square background, occupying central 80% of canvas with safe transparent margins. No words, letters, watermark, scene, border, sample grid or surrounding app tile. Clear at 24–40dp. Monochrome dark graphite/near-black navigation glyph, calm and neutral, tiny raised edge rather than a line drawing, minimal internal detail. A broad downward arrow entering a shallow open download tray, one clean connected composition.",
+    "edit_reference": [],
+    "transparent_background": true,
+    "superseded_initial_prompt": null
+  },
+  {
+    "name": "favorite",
+    "file": "generated/favorite.png",
+    "builtin_output": "exec-808f9257-8211-4432-afdc-f4a30310954b.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: logo-brand. Asset type: one final production Android file-manager icon. Style: premium HyperOS-like mostly flat illustration with a hint of physical thickness, crisp broad silhouette, restrained two-tone shading and tiny top-left bevel highlight. No heavy 3D or perspective, no clay, plastic toy, glass, photograph, rainbow glow or dramatic shadow. Exactly one centered subject on a genuinely transparent square background, occupying central 80% of canvas with safe transparent margins. No words, letters, watermark, scene, border, sample grid or surrounding app tile. Clear at 24–40dp. Monochrome dark graphite/near-black navigation glyph, calm and neutral, tiny raised edge rather than a line drawing, minimal internal detail. A single balanced heart silhouette, solid graphite with gently rounded lobes.",
+    "edit_reference": [],
+    "transparent_background": true,
+    "superseded_initial_prompt": null
+  },
+  {
+    "name": "recent",
+    "file": "generated/recent.png",
+    "builtin_output": "exec-625e18b2-1d37-429a-a3c0-61f5d6ecf5f9.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: precise-object-edit. Input image is the edit target and the reference for clean edges. Replace its back-arrow subject completely with the requested standalone generic UI control glyph. Preserve its transparent empty background and understated slightly raised finish. This is a control symbol, NOT a file-manager illustration. No folder, document, card, app tile, frame, container, shadow, glow, halo, scene, text or additional objects. Center the requested symbol at 75% of the square canvas. Exactly one dark graphite circular clock face with two ivory hands. NOTHING ELSE.",
+    "edit_reference": [
+      "exec-1d8bf00d-6522-4d6f-8d6e-cd2ef57dd278.png"
+    ],
+    "transparent_background": true,
+    "superseded_initial_prompt": "Use case: logo-brand. Asset type: one final production Android file-manager icon. Style: premium HyperOS-like mostly flat illustration with a hint of physical thickness, crisp broad silhouette, restrained two-tone shading and tiny top-left bevel highlight. No heavy 3D or perspective, no clay, plastic toy, glass, photograph, rainbow glow or dramatic shadow. Exactly one centered subject on a genuinely transparent square background, occupying central 80% of canvas with safe transparent margins. No words, letters, watermark, scene, border, sample grid or surrounding app tile. Clear at 24–40dp. Monochrome dark graphite/near-black navigation glyph, calm and neutral, tiny raised edge rather than a line drawing, minimal internal detail. A round clock face with two pale hands indicating roughly ten past ten; solid graphite face, no numerals."
+  },
+  {
+    "name": "browse",
+    "file": "generated/browse.png",
+    "builtin_output": "exec-d87e0db8-b034-41e0-8bbe-60fa666045a1.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: logo-brand. Asset type: one final production Android file-manager icon. Style: premium HyperOS-like mostly flat illustration with a hint of physical thickness, crisp broad silhouette, restrained two-tone shading and tiny top-left bevel highlight. No heavy 3D or perspective, no clay, plastic toy, glass, photograph, rainbow glow or dramatic shadow. Exactly one centered subject on a genuinely transparent square background, occupying central 80% of canvas with safe transparent margins. No words, letters, watermark, scene, border, sample grid or surrounding app tile. Clear at 24–40dp. Monochrome dark graphite/near-black navigation glyph, calm and neutral, tiny raised edge rather than a line drawing, minimal internal detail. A simple compact solid graphite folder with a tab at upper left and a fine light horizontal front-panel seam, for bottom navigation.",
+    "edit_reference": [],
+    "transparent_background": true,
+    "superseded_initial_prompt": null
+  },
+  {
+    "name": "compress",
+    "file": "generated/compress.png",
+    "builtin_output": "exec-80468882-2a1e-4e84-a0a7-3ad63f2e48d0.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: logo-brand. Asset type: one final production Android file-manager icon. Style: premium HyperOS-like mostly flat illustration with a hint of physical thickness, crisp broad silhouette, restrained two-tone shading and tiny top-left bevel highlight. No heavy 3D or perspective, no clay, plastic toy, glass, photograph, rainbow glow or dramatic shadow. Exactly one centered subject on a genuinely transparent square background, occupying central 80% of canvas with safe transparent margins. No words, letters, watermark, scene, border, sample grid or surrounding app tile. Clear at 24–40dp. Monochrome dark graphite/near-black navigation glyph, calm and neutral, tiny raised edge rather than a line drawing, minimal internal detail. A compact graphite archive case with one fine ivory zipper down the middle, for bottom navigation; visually simple at 24dp.",
+    "edit_reference": [],
+    "transparent_background": true,
+    "superseded_initial_prompt": null
+  },
+  {
+    "name": "check",
+    "file": "generated/check.png",
+    "builtin_output": "exec-147a70df-14aa-4e1c-b887-86db98f200c0.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: precise-object-edit. Input image is the edit target and the reference for clean edges. Replace its back-arrow subject completely with the requested standalone generic UI control glyph. Preserve its transparent empty background and understated slightly raised finish. This is a control symbol, NOT a file-manager illustration. No folder, document, card, app tile, frame, container, shadow, glow, halo, scene, text or additional objects. Center the requested symbol at 75% of the square canvas. Exactly one cobalt-blue circular badge with a single ivory check mark inside. NOTHING ELSE.",
+    "edit_reference": [
+      "exec-1d8bf00d-6522-4d6f-8d6e-cd2ef57dd278.png"
+    ],
+    "transparent_background": true,
+    "superseded_initial_prompt": "Use case: logo-brand. Asset type: one final production Android file-manager icon. Style: premium HyperOS-like mostly flat illustration with a hint of physical thickness, crisp broad silhouette, restrained two-tone shading and tiny top-left bevel highlight. No heavy 3D or perspective, no clay, plastic toy, glass, photograph, rainbow glow or dramatic shadow. Exactly one centered subject on a genuinely transparent square background, occupying central 80% of canvas with safe transparent margins. No words, letters, watermark, scene, border, sample grid or surrounding app tile. Clear at 24–40dp. A crisp blue circular selection badge containing a broad ivory check mark; very restrained raised edge, centered and symmetric, no extra ring or decoration."
+  },
+  {
+    "name": "circle",
+    "file": "generated/circle.png",
+    "builtin_output": "exec-dd6ce788-3a6b-4684-b331-53f3ab9fca59.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: precise-object-edit. Input image is the edit target and the reference for clean edges. Replace its back-arrow subject completely with the requested standalone generic UI control glyph. Preserve its transparent empty background and understated slightly raised finish. This is a control symbol, NOT a file-manager illustration. No folder, document, card, app tile, frame, container, shadow, glow, halo, scene, text or additional objects. Center the requested symbol at 75% of the square canvas. Exactly one thin dark graphite circular ring with a completely transparent interior. NOTHING ELSE.",
+    "edit_reference": [
+      "exec-1d8bf00d-6522-4d6f-8d6e-cd2ef57dd278.png"
+    ],
+    "transparent_background": true,
+    "superseded_initial_prompt": "Use case: logo-brand. Asset type: one final production Android file-manager icon. Style: premium HyperOS-like mostly flat illustration with a hint of physical thickness, crisp broad silhouette, restrained two-tone shading and tiny top-left bevel highlight. No heavy 3D or perspective, no clay, plastic toy, glass, photograph, rainbow glow or dramatic shadow. Exactly one centered subject on a genuinely transparent square background, occupying central 80% of canvas with safe transparent margins. No words, letters, watermark, scene, border, sample grid or surrounding app tile. Clear at 24–40dp. An unselected circular selection control: a clean thin dark-graphite circular rim with a large truly transparent center, a subtle raised lip and no fill, symmetric perfect circle, not a sphere."
+  },
+  {
+    "name": "notification",
+    "file": "generated/notification.png",
+    "builtin_output": "exec-c4bafe13-1f46-433b-a554-d4ed89a303f6.png",
+    "mode": "builtin-imagegen",
+    "prompt": "Use case: precise-object-edit. Input image is the edit target and the reference for clean edges. Replace its back-arrow subject completely with the requested standalone generic UI control glyph. Preserve its transparent empty background and understated slightly raised finish. This is a control symbol, NOT a file-manager illustration. No folder, document, card, app tile, frame, container, shadow, glow, halo, scene, text or additional objects. Center the requested symbol at 75% of the square canvas. Exactly one pure-white archive-case stencil with a transparent zipper seam and tiny transparent zipper-pull cutout. No shading of any kind; only opaque white and transparent pixels.",
+    "edit_reference": [
+      "exec-1d8bf00d-6522-4d6f-8d6e-cd2ef57dd278.png"
+    ],
+    "transparent_background": true,
+    "superseded_initial_prompt": "Use case: logo-brand. A single Android status-bar small-icon asset, pure opaque white silhouette on genuinely transparent background. Compact archive case silhouette with a transparent zipper seam and simple pull cutout. Flat stencil with no shading, no colors, no text, no background tile, centered at 78% of canvas, readable at 24 pixels."
+  },
+  {
+    "name": "play",
+    "file": "generated/play.png",
+    "mode": "builtin-imagegen",
+    "version": "1.0.4",
+    "prompt": "Use case: logo-brand. Asset type: a single tiny mobile video playback badge for ZipDoctorC Android file manager, supplied as raster PNG with true transparent background. Exactly one white circular disc, and a dark charcoal right-pointing play triangle neatly centered inside it. Front view, clean flat silhouette with extremely subtle dimensional softness like a polished Xiaomi file-manager media overlay. The circle is nearly pure white, the triangle is solid charcoal. Disc occupies about 86% of square canvas, generous transparent corners. This is a 20dp media thumbnail overlay so strong simple legibility matters; no surrounding tile, no file/document shape, no text, no words, no watermark, no extra symbols. Render the actual image with alpha transparency."
+  }
+]

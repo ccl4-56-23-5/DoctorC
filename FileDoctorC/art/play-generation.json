@@ -1,0 +1,7 @@
+{
+  "name": "play",
+  "file": "generated/play.png",
+  "mode": "builtin-imagegen",
+  "version": "1.0.4",
+  "prompt": "Use case: logo-brand. Asset type: a single tiny mobile video playback badge for ZipDoctorC Android file manager, supplied as raster PNG with true transparent background. Exactly one white circular disc, and a dark charcoal right-pointing play triangle neatly centered inside it. Front view, clean flat silhouette with extremely subtle dimensional softness like a polished Xiaomi file-manager media overlay. The circle is nearly pure white, the triangle is solid charcoal. Disc occupies about 86% of square canvas, generous transparent corners. This is a 20dp media thumbnail overlay so strong simple legibility matters; no surrounding tile, no file/document shape, no text, no words, no watermark, no extra symbols. Render the actual image with alpha transparency."
+}

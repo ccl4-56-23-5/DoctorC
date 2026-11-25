@@ -1,0 +1,1 @@
+LAN transfers continue while you browse files or use search. Both sending and receiving show batch progress, with cancellation available for outgoing transfers.

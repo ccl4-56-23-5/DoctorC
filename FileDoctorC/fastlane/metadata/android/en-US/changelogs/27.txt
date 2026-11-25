@@ -1,0 +1,1 @@
+Adds a shortcut to the Android folder and a dedicated storage permission entry. Browse shared Android/media files and available ZipDoctorC folders. Android's protections for other apps' data remain in effect.

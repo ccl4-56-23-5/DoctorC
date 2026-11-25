@@ -1,0 +1,1 @@
+Send BookDoctorC module migration packages over the local network. Tap a received .bdcm file to open it in BookDoctorC with read-only access.
