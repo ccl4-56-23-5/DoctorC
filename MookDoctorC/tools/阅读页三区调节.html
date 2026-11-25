@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>阅读页三区调节 · BookDoctorC</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #282c2a;
+      --muted: #5b625d;
+      --rule: #dcded5;
+      --paper: #fffefa;
+      --previous: #36786e;
+      --menu: #9a6b27;
+      --next: #4f65a4;
+      font-family: "Microsoft YaHei UI", "PingFang SC", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #f4f5ef; color: var(--ink); }
+    main { width: min(100%, 1100px); margin: auto; padding: 28px 24px; }
+    header { margin-bottom: 20px; }
+    .eyebrow { color: var(--previous); font-size: .83rem; font-weight: 700; letter-spacing: .11em; }
+    h1 { font-size: clamp(1.75rem, 4vw, 2.5rem); letter-spacing: -.04em; margin: 6px 0; }
+    h2 { font-size: 1.08rem; margin: 0; }
+    p { margin: 0; }
+    .muted { color: var(--muted); font-size: .88rem; line-height: 1.65; }
+    .workbench { display: grid; grid-template-columns: minmax(0, 1fr) minmax(290px, 360px); gap: 16px; align-items: start; }
+    .panel { min-width: 0; border: 1px solid var(--rule); border-radius: 14px; background: var(--paper); padding: 16px; }
+    .panel-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .toolbar, .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    button, input, select, textarea { font: inherit; }
+    button, select {
+      color: var(--ink); background: var(--paper); border: 1px solid var(--rule);
+      border-radius: 7px; padding: 6px 10px; font-size: .85rem;
+    }
+    button { cursor: pointer; }
+    button:hover, select:hover { background: #f0f1ea; }
+    :focus-visible { outline: 2px solid var(--previous); outline-offset: 2px; }
+    .checkbox { display: inline-flex; gap: 4px; align-items: center; font-size: .85rem; }
+    input[type="checkbox"], input[type="range"] { accent-color: var(--previous); }
+    .stage {
+      display: grid; place-items: center; padding: 14px; background: #eeefe8;
+      border: 1px solid var(--rule); border-radius: 10px;
+    }
+    .reader {
+      position: relative; width: min(100%, 294px); aspect-ratio: 9 / 16; overflow: hidden;
+      border-radius: 8px; background: #fcf7e9; box-shadow: 0 5px 16px #282c2a23;
+      cursor: crosshair; user-select: none;
+    }
+    .reader.landscape { width: min(100%, 540px); aspect-ratio: 16 / 9; }
+    .sample {
+      position: absolute; inset: 0; padding: 9% 9% 0; overflow: hidden;
+      font-family: "Songti SC", SimSun, serif; font-size: .97rem; line-height: 1.95; color: #655b49;
+    }
+    .sample h3 { font-size: 1.15rem; font-weight: 600; margin: 0 0 .65em; }
+    .sample p { margin-bottom: .8em; text-indent: 2em; }
+    .landscape .sample { padding-top: 5%; }
+    .overlay { position: absolute; inset: 0; pointer-events: none; }
+    .overlay svg { display: block; width: 100%; height: 100%; }
+    .overlay path { fill-opacity: .22; }
+    #previous-zone { fill: var(--previous); }
+    #menu-zone { fill: var(--menu); }
+    #next-zone { fill: var(--next); }
+    #edges { fill: none; stroke: #393e36; stroke-dasharray: 5 4; stroke-width: 1; }
+    .handle {
+      position: absolute; display: grid; place-items: center; width: 34px; height: 34px;
+      transform: translate(-50%, -50%); border-radius: 50%; background: #fffdf7;
+      border: 1px solid #494e45; color: #282c2a; font-size: 1rem; font-weight: 700;
+      line-height: 1; touch-action: none; pointer-events: auto; box-shadow: 0 1px 4px #282c2a25;
+    }
+    .handle[data-axis="x"] { cursor: ew-resize; }
+    .handle[data-axis="y"] { cursor: ns-resize; }
+    .marker {
+      position: absolute; width: 12px; height: 12px; border: 2px solid #fff;
+      border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none;
+      box-shadow: 0 0 0 1px #282c2a;
+    }
+    .legend {
+      display: flex; flex-wrap: wrap; gap: 8px 16px; list-style: none;
+      margin: 12px 0 8px; padding: 0; font-size: .85rem;
+    }
+    .legend li { display: flex; align-items: center; gap: 5px; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--zone-color); }
+    .previous { --zone-color: var(--previous); }
+    .menu { --zone-color: var(--menu); }
+    .next { --zone-color: var(--next); }
+    .area, .tap { font-variant-numeric: tabular-nums; }
+    .tap { display: block; min-height: 2.3em; padding: 6px 9px; border-radius: 6px; background: #f1f2eb; font-size: .85rem; }
+    .boundary-list { display: grid; gap: 14px; margin: 16px 0; }
+    .boundary { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px 12px; }
+    .boundary > label { grid-column: 1 / -1; font-size: .9rem; font-weight: 600; }
+    .boundary input[type="range"] { width: 100%; margin: 0; cursor: pointer; }
+    .number { display: flex; align-items: center; gap: 4px; color: var(--muted); font-size: .85rem; }
+    .number input {
+      width: 4.1em; padding: 5px; border: 1px solid var(--rule); border-radius: 6px;
+      color: var(--ink); background: var(--paper); text-align: right;
+    }
+    .result { border-top: 1px solid var(--rule); padding-top: 14px; }
+    .result label { display: block; margin-bottom: 6px; font-size: .9rem; font-weight: 600; }
+    textarea {
+      width: 100%; resize: vertical; min-height: 6.5em; padding: 8px; margin-bottom: 8px;
+      border: 1px solid var(--rule); border-radius: 7px; background: #f7f8f2;
+      color: var(--ink); font-size: .84rem; line-height: 1.45;
+    }
+    .primary { background: #285e55; color: white; border-color: #285e55; }
+    .primary:hover { background: #1d4c44; }
+    @media (max-width: 730px) {
+      main { padding: 18px 12px; }
+      .workbench { grid-template-columns: 1fr; }
+      .panel { padding: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">BOOKDOCTORC 1.0.0 · 阅读交互</p>
+      <h1>阅读页三区调节</h1>
+      <p class="muted">拖动预览中的圆点或调节滑杆，再点按正文，查看当前位置触发的动作。</p>
+    </header>
+
+    <div class="workbench">
+      <section class="panel" aria-labelledby="preview-title">
+        <div class="panel-head">
+          <h2 id="preview-title">正文预览</h2>
+          <div class="toolbar">
+            <select id="orientation" aria-label="预览方向">
+              <option value="portrait">竖屏</option>
+              <option value="landscape">横屏</option>
+            </select>
+            <label class="checkbox"><input type="checkbox" id="show-zones" checked> 显示分区</label>
+          </div>
+        </div>
+        <div class="stage">
+          <div class="reader" id="reader">
+            <article class="sample">
+              <h3>灯下读书</h3>
+              <p>窗外渐渐暗下来，雨沿着檐角滴落。她把桌上的灯拨亮，翻回昨日读到的那一页。</p>
+              <p>读到第二段时，她听见楼下有人收伞。几声脚步过后，走廊又安静下来，只剩下雨点落在窗台上的声音。</p>
+              <p>书页边缘留着一行铅笔字。她用手指按住那一角，顺着细小的笔画把句子又读了一遍。</p>
+              <p>夜渐深了。她夹进书签，合上书，把桌上的茶喝完。</p>
+            </article>
+            <div class="overlay" id="overlay" aria-hidden="true">
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+                <path id="previous-zone"></path>
+                <path id="menu-zone"></path>
+                <path id="next-zone"></path>
+                <path id="edges" vector-effect="non-scaling-stroke"></path>
+              </svg>
+              <span class="handle" data-boundary="top" data-axis="y" title="顶部整带下缘">↕</span>
+              <span class="handle" data-boundary="bottom" data-axis="y" title="中央选项下缘">↕</span>
+              <span class="handle" data-boundary="left" data-axis="x" title="向前区右缘">↔</span>
+              <span class="handle" data-boundary="right" data-axis="x" title="中央选项右缘">↔</span>
+            </div>
+            <span class="marker" id="marker" hidden></span>
+          </div>
+        </div>
+        <ul class="legend" aria-label="各动作覆盖的正文面积">
+          <li class="previous"><span class="dot"></span>向前 <span class="area" id="previous-area"></span></li>
+          <li class="menu"><span class="dot"></span>选项 <span class="area" id="menu-area"></span></li>
+          <li class="next"><span class="dot"></span>向后 <span class="area" id="next-area"></span></li>
+        </ul>
+        <output class="tap" id="tap-result" aria-live="polite">点按正文试一下。</output>
+      </section>
+
+      <section class="panel" aria-labelledby="controls-title">
+        <div class="panel-head">
+          <h2 id="controls-title">边界参数</h2>
+          <button type="button" id="reset">恢复 1.0.0 默认值</button>
+        </div>
+        <p class="muted">以正文左上角为原点。横向按正文宽度计，纵向按正文高度计。</p>
+        <div class="boundary-list">
+          <div class="boundary">
+            <label for="top-range">顶部整带下缘 Y</label>
+            <input id="top-range" type="range" min="0" max="100" step="1">
+            <span class="number"><input id="top-number" type="number" min="0" max="100" step="1" aria-label="顶部整带下缘 Y 百分比">%</span>
+          </div>
+          <div class="boundary">
+            <label for="bottom-range">中央选项下缘 Y</label>
+            <input id="bottom-range" type="range" min="0" max="100" step="1">
+            <span class="number"><input id="bottom-number" type="number" min="0" max="100" step="1" aria-label="中央选项下缘 Y 百分比">%</span>
+          </div>
+          <div class="boundary">
+            <label for="left-range">向前区右缘 X</label>
+            <input id="left-range" type="range" min="0" max="100" step="1">
+            <span class="number"><input id="left-number" type="number" min="0" max="100" step="1" aria-label="向前区右缘 X 百分比">%</span>
+          </div>
+          <div class="boundary">
+            <label for="right-range">中央选项右缘 X</label>
+            <input id="right-range" type="range" min="0" max="100" step="1">
+            <span class="number"><input id="right-number" type="number" min="0" max="100" step="1" aria-label="中央选项右缘 X 百分比">%</span>
+          </div>
+        </div>
+        <div class="result">
+          <label for="parameters">当前方案</label>
+          <textarea id="parameters" readonly rows="4" spellcheck="false"></textarea>
+          <div class="actions">
+            <button class="primary" type="button" id="copy">复制参数</button>
+            <span class="muted" id="copy-status" role="status"></span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+  <script>
+    const defaults = { top: 32, bottom: 59, left: 35, right: 62 };
+    const values = { ...defaults };
+    const limits = { top: [null, 'bottom'], bottom: ['top', null], left: [null, 'right'], right: ['left', null] };
+    const labels = { previous: '向前', menu: '打开选项', next: '向后' };
+    const get = id => document.getElementById(id);
+    const reader = get('reader');
+    const marker = get('marker');
+    const tapResult = get('tap-result');
+    const copyStatus = get('copy-status');
+    const parameters = get('parameters');
+    const controls = Object.keys(defaults).map(key => ({
+      key, range: get(key + '-range'), number: get(key + '-number'),
+      handle: document.querySelector('[data-boundary="' + key + '"]')
+    }));
+    const clamp = (number, min, max) => Math.max(min, Math.min(max, number));
+    let lastTap = null;
+
+    function actionAt(x, y) {
+      const { top, bottom, left, right } = values;
+      if (y < top || (y < bottom && x >= left && x < right)) return 'menu';
+      return x < left ? 'previous' : 'next';
+    }
+
+    function updateTap() {
+      if (!lastTap) {
+        marker.hidden = true;
+        tapResult.textContent = '点按正文试一下。';
+        return;
+      }
+      const { x, y } = lastTap;
+      const action = actionAt(x, y);
+      marker.hidden = false;
+      marker.style.left = x + '%';
+      marker.style.top = y + '%';
+      marker.style.background = 'var(--' + action + ')';
+      tapResult.textContent = labels[action] + ' · X ' + x.toFixed(1) + '% · Y ' + y.toFixed(1) + '%';
+    }
+
+    function render() {
+      const { top, bottom, left, right } = values;
+      get('previous-zone').setAttribute('d', `M0 ${top} H${left} V100 H0 Z`);
+      get('menu-zone').setAttribute('d', `M0 0 H100 V${top} H${right} V${bottom} H${left} V${top} H0 Z`);
+      get('next-zone').setAttribute('d', `M${right} ${top} H100 V100 H${left} V${bottom} H${right} Z`);
+      get('edges').setAttribute('d', `M0 ${top} H100 M${left} ${top} V100 M${right} ${top} V${bottom} H${left}`);
+
+      const previousArea = (100 - top) * left / 100;
+      const menuArea = top + (bottom - top) * (right - left) / 100;
+      get('previous-area').textContent = previousArea.toFixed(1) + '%';
+      get('menu-area').textContent = menuArea.toFixed(1) + '%';
+      get('next-area').textContent = (100 - previousArea - menuArea).toFixed(1) + '%';
+
+      const anchors = {
+        top: [79, top],
+        bottom: [(left + right) / 2, bottom],
+        left: [left, top + (100 - top) * .76],
+        right: [right, (top + bottom) / 2]
+      };
+      for (const { key, range, number, handle } of controls) {
+        const [lower, upper] = limits[key];
+        range.min = number.min = values[lower] ?? 0;
+        range.max = number.max = values[upper] ?? 100;
+        range.value = number.value = values[key];
+        const [x, y] = anchors[key];
+        handle.style.left = `clamp(17px, ${x}%, 100% - 17px)`;
+        handle.style.top = `clamp(17px, ${y}%, 100% - 17px)`;
+      }
+      parameters.value = [
+        `顶部整带下缘 Y = ${top}%`,
+        `中央选项下缘 Y = ${bottom}%`,
+        `向前区右缘 X = ${left}%`,
+        `中央选项右缘 X = ${right}%`
+      ].join('\n');
+      copyStatus.textContent = '';
+      updateTap();
+    }
+
+    function setBoundary(key, candidate) {
+      const [lower, upper] = limits[key];
+      if (Number.isFinite(candidate)) {
+        values[key] = clamp(Math.round(candidate), values[lower] ?? 0, values[upper] ?? 100);
+      }
+      render();
+    }
+
+    for (const { key, range, number, handle } of controls) {
+      range.addEventListener('input', () => setBoundary(key, range.valueAsNumber));
+      number.addEventListener('change', () => setBoundary(key, number.valueAsNumber));
+      number.addEventListener('keydown', event => {
+        if (event.key === 'Enter') number.blur();
+      });
+
+      let drag = null;
+      const isHorizontal = handle.dataset.axis === 'x';
+      const coordinate = event => isHorizontal ? event.clientX : event.clientY;
+      handle.addEventListener('pointerdown', event => {
+        if (!event.isPrimary || event.button !== 0) return;
+        const bounds = reader.getBoundingClientRect();
+        drag = { id: event.pointerId, origin: coordinate(event), start: values[key],
+          span: isHorizontal ? bounds.width : bounds.height };
+        handle.setPointerCapture(event.pointerId);
+      });
+      handle.addEventListener('pointermove', event => {
+        if (drag?.id !== event.pointerId) return;
+        setBoundary(key, drag.start + 100 * (coordinate(event) - drag.origin) / drag.span);
+      });
+      handle.addEventListener('lostpointercapture', () => { drag = null; });
+    }
+
+    reader.addEventListener('click', event => {
+      if (event.target.closest('.handle')) return;
+      const rect = reader.getBoundingClientRect();
+      lastTap = {
+        x: 100 * (event.clientX - rect.left) / rect.width,
+        y: 100 * (event.clientY - rect.top) / rect.height
+      };
+      updateTap();
+    });
+
+    get('orientation').addEventListener('change', event => {
+      reader.classList.toggle('landscape', event.target.value === 'landscape');
+    });
+    get('show-zones').addEventListener('change', event => {
+      get('overlay').hidden = !event.target.checked;
+    });
+    get('reset').addEventListener('click', () => {
+      Object.assign(values, defaults);
+      lastTap = null;
+      render();
+    });
+    get('copy').addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(parameters.value);
+        copyStatus.textContent = '已复制';
+      } catch {
+        parameters.focus();
+        parameters.select();
+        copyStatus.textContent = '已选中，按 Ctrl+C 复制。';
+      }
+    });
+    render();
+  </script>
+</body>
+</html>

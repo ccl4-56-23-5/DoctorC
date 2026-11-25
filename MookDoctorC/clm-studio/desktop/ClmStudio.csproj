@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <ApplicationIcon>Assets\clm.ico</ApplicationIcon>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>CLMStudio</AssemblyName>
+    <RootNamespace>ClmStudio</RootNamespace>
+    <Version>0.2.1+5</Version>
+    <FileVersion>0.2.1.0</FileVersion>
+    <AssemblyVersion>0.2.1.0</AssemblyVersion>
+    <Company>CLM Tools</Company>
+    <Product>CLM Studio</Product>
+    <Description>封装和整理 CLM 音频归档</Description>
+  </PropertyGroup>
+</Project>
