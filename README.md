@@ -1,15 +1,18 @@
 # DoctorC 系列软件
 
-DoctorC 汇集 FileDoctorC、MookDoctorC 和随 MookDoctorC 发布的 CLM Studio。各软件独立构建并沿用各自的版本号。
+DoctorC 提供 Android 文件管理与局域网互传，以及本地阅读、播客与音乐播放。
 
-| 软件 | 用途 | 源码 | 安装包 |
-| --- | --- | --- | --- |
-| FileDoctorC | Android 文件管理、压缩解压与局域网互传 | [FileDoctorC](FileDoctorC/) | [Android 1.1.5+30](https://github.com/ccl4-56-23-5/DoctorC/releases/tag/filedoctorc-v1.1.5%2B30) |
-| MookDoctorC | Android 本地阅读、播客与音乐播放，支持通过 FileDoctorC 换机迁移 | [MookDoctorC](MookDoctorC/) | [Android 1.0.24+33](https://github.com/ccl4-56-23-5/DoctorC/releases/tag/mookdoctorc-v1.0.24%2B33) |
-| CLM Studio | Windows CLM 2 封装工具 | [CLM Studio](MookDoctorC/clm-studio/) | [Windows 0.2.1+5](https://github.com/ccl4-56-23-5/DoctorC/releases/tag/mookdoctorc-v1.0.24%2B33) |
+## 软件与下载
 
-使用和构建说明见各软件目录的 README。CLM 内容口令在使用时输入。Android 安装包沿用原版签名，可覆盖同包名、同签名版本。
+- [FileDoctorC（doctor-file）](doctor-file/) · Android 文件管理、压缩解压与局域网互传。[下载 Android APK 1.1.5+30](https://github.com/ccl4-56-23-5/DoctorC/releases/tag/filedoctorc-v1.1.5%2B30)
+- [MookDoctorC（doctor-mook）](doctor-mook/) · Android 本地阅读、播客及音乐播放器，支持通过 FileDoctorC 迁移资料。[下载 Android APK 1.0.24+33](https://github.com/ccl4-56-23-5/DoctorC/releases/tag/mookdoctorc-v1.0.24%2B33)
+  - [CLM Studio](doctor-mook/clm-studio/) · MookDoctorC 配套的 Windows 音频封装工具，在同一发行页下载 [Windows 安装包 0.2.1+5](https://github.com/ccl4-56-23-5/DoctorC/releases/tag/mookdoctorc-v1.0.24%2B33)。
 
-系列仓库是统一的源码和下载入口。[FileDoctorC 原仓库](https://github.com/ccl4-56-23-5/FileDoctorC)与 [MookDoctorC 原仓库](https://github.com/ccl4-56-23-5/MookDoctorC)保留各自的提交和原发行链接。系列仓库的标签以软件名称为前缀。
+各项目目录列出使用和构建方法。安装包的 SHA-256 附于发行说明。
 
-各软件的许可证及第三方通知随各自目录保留。
+## 开源致谢
+
+感谢 ZipXtract、Liquid-Glass-Android、7-Zip、Legado、EpubLib、ICU、AndroidX Media3 与 .NET 桌面运行时的作者和维护者，以及本项目所用其他开源组件的贡献者。
+
+- FileDoctorC 基于 WirelessAlien 的 ZipXtract，并使用 7-Zip 绑定及其他归档组件。液态玻璃折射实现改编自 pandadog 的 Liquid-Glass-Android。[源码来源与第三方许可](doctor-file/THIRD_PARTY.md)
+- MookDoctorC 复用了 gedoor 的 Legado 所集成的 EPUB 解析与 ICU 字符集检测源码，播放使用 AndroidX Media3。配套 CLM Studio 使用 .NET 和 WPF。[源码来源与第三方许可](doctor-mook/THIRD_PARTY.md)

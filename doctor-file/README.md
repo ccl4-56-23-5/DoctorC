@@ -1,6 +1,6 @@
 # FileDoctorC
 
-FileDoctorC 是 Android 文件管理、压缩解压和局域网互传工具。当前 Release 为 **1.1.5+30**，支持 Android 7.0 及以上。沿用原 ZipDoctorC 的应用 ID 和发行证书，兼容该签名的既有安装。
+FileDoctorC 是 Android 文件管理、压缩解压和局域网互传工具。当前 Release 为 **1.1.5+30**，支持 Android 7.0 及以上。签名 APK 支持覆盖安装相同应用 ID 和签名的版本。
 
 ## 文件管理
 
@@ -20,7 +20,7 @@ FileDoctorC 是 Android 文件管理、压缩解压和局域网互传工具。�
 1. 两端连接同一 IPv4 局域网并打开 FileDoctorC。
 2. 发送端长按选中一个或多个文件、文件夹，点「传输」，选择发现的设备。
 3. 接收端确认请求及保存目录。确认后两端仍可浏览和搜索，进度、取消入口和结果可从相应页面查看。
-4. 混合批次保留子目录和空文件夹，接收端逐文件核对 SHA-256，校验后发布文件并尝试恢复文件时间。遇到同名项目自动编号。混合批次需要两端至少使用 1.1.3+28。
+4. 混合批次保留子目录和空文件夹，接收端逐文件核对 SHA-256，校验后发布文件并尝试恢复文件时间。遇到同名项目自动编号。发送和接收设备均需支持文件夹传输。
 
 ## 与 MookDoctorC 换机迁移
 
@@ -28,8 +28,8 @@ FileDoctorC 是 Android 文件管理、压缩解压和局域网互传工具。�
 
 ## 安装、构建与许可
 
-从 Releases 获取签名 APK，安装前可与同页 SHA-256 校验表比对。源码使用 Android SDK Platform 37、Build Tools 37.0.0、NDK 28.2.13676358、CMake 3.22.1、JDK 21 和 Gradle Wrapper。工作区构建、签名与验证入口见维护文档。
+从 [FileDoctorC 发行页](https://github.com/ccl4-56-23-5/DoctorC/releases/tag/filedoctorc-v1.1.5%2B30)获取签名 APK，安装前可与同页 SHA-256 校验表比对。源码使用 Android SDK Platform 37、Build Tools 37.0.0、NDK 28.2.13676358、CMake 3.22.1、JDK 21 和 Gradle Wrapper。工作区构建、签名与验证入口见维护文档。
 
-FileDoctorC 是 ZipXtract 的非官方衍生项目，保留 GPL-3.0-or-later 和第三方声明。第三方压缩组件的对应源码随仓库提供。
+FileDoctorC 是 ZipXtract 的非官方衍生项目，保留 GPL-3.0-or-later 和第三方声明。感谢 ZipXtract、Liquid-Glass-Android、7-Zip 及各第三方项目的贡献者。压缩组件的对应源码随仓库提供。
 
-[维护文档](维护文档.md) · [设定记录](设定记录.md) · [开发说明](开发说明.md) · [第三方许可](THIRD_PARTY.md)
+[维护文档](维护文档.md) · [设定记录](设定记录.md) · [开发说明](开发说明.md) · [开源声明与致谢](THIRD_PARTY.md)
