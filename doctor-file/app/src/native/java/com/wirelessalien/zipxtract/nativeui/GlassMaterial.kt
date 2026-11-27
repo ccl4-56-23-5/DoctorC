@@ -60,7 +60,7 @@ class GlassMaterial(context:Context) {
     private val hazeCompatibility = Profile(
         blurRadius=0f,
         overlayColor=androidx.core.graphics.ColorUtils.setAlphaComponent(palette.surface, 51),
-        rimColor=if(dark)0x8ddeecff.toInt() else 0x6a526b8c,
+        rimColor=if(dark)0x385b6a80 else 0x32526b8c,
         elevationDp=3f,
         outlineAlpha=if(dark).33f else .36f
     )
@@ -95,7 +95,7 @@ class GlassMaterial(context:Context) {
         // The shader draws its own rim. Keep the compatibility rim configured if the GPU path fails.
         val rimColor=if(optical&&!opticalShadow)Color.TRANSPARENT else material.rimColor
         if(state.rimColor!=rimColor){
-            state.rimColor=rimColor;state.rim.setStroke(if(style==LiquidGlassStyle.HAZE_DOCK)(density*1.15f).roundToInt().coerceAtLeast(1) else edgeWidth,rimColor)
+            state.rimColor=rimColor;state.rim.setStroke(edgeWidth,rimColor)
         }
         if(state.overlayColor!=material.overlayColor){state.overlayColor=material.overlayColor;view.setOverlayColor(material.overlayColor)}
         if(abs(state.blur-material.blurRadius)>.01f){state.blur=material.blurRadius;view.setBlurRadius(material.blurRadius.coerceAtLeast(.01f))}
@@ -153,8 +153,6 @@ class GlassMaterial(context:Context) {
             state.colors[1]=if(dark)Color.argb((24+12*t).roundToInt(),118,137,166)
                 else Color.argb((24+8*t).roundToInt(),137,148,167)
             state.fill.colors=state.colors
-            state.fill.setStroke(edgeWidth,if(dark)Color.argb((38+30*t).roundToInt(),216,226,244)
-                else Color.argb((78+30*t).roundToInt(),255,255,255))
             // Child draw order already puts the lens under the labels. A separate shadow
             // makes the two nested glass edges look like stacked solid controls.
             view.elevation=0f

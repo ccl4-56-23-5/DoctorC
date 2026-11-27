@@ -1,5 +1,5 @@
 param(
-    [string]$BuildDirectory = (Join-Path $env:TEMP 'FileDoctorC-build-1.2.0+34'),
+    [string]$BuildDirectory = (Join-Path $env:TEMP 'FileDoctorC-build-1.2.1+35'),
     [string]$Jdk = $env:JAVA_HOME,
     [string]$Sdk = $env:ANDROID_HOME,
     [string]$GradleCache = $env:GRADLE_USER_HOME,

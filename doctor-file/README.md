@@ -1,6 +1,6 @@
 # FileDoctorC
 
-FileDoctorC 是 Android 文件管理、压缩解压和设备互传工具。当前发布 **1.2.0+34**，支持 Android 7.0 及以上的 ARM64 设备。签名 APK 支持覆盖安装相同应用 ID 和签名的版本。
+FileDoctorC 是 Android 文件管理、压缩解压和设备互传工具。当前版本 **1.2.1+35**，支持 Android 7.0 及以上的 ARM64 设备。签名 APK 支持覆盖安装相同应用 ID 和签名的版本。
 
 ## 文件管理
 
@@ -34,7 +34,7 @@ FileDoctorC 是 Android 文件管理、压缩解压和设备互传工具。当�
 
 ## 安装、构建与许可
 
-从 [1.2.0+34 的 GitHub 发布页](https://github.com/ccl4-56-23-5/DoctorC/releases/tag/filedoctorc-v1.2.0%2B34)获取 ARM64 签名 APK，安装前可与同页 SHA-256 校验表比对。源码使用 Android SDK Platform 37、Build Tools 37.0.0、NDK 28.2.13676358、CMake 3.22.1、JDK 21 和 Gradle Wrapper。工作区构建、签名与验证入口见维护文档。
+从 [1.2.1+35 的 GitHub 发布页](https://github.com/ccl4-56-23-5/DoctorC/releases/tag/filedoctorc-v1.2.1%2B35)获取 ARM64 签名 APK，安装前可与同页 SHA-256 校验表比对。源码使用 Android SDK Platform 37、Build Tools 37.0.0、NDK 28.2.13676358、CMake 3.22.1、JDK 21 和 Gradle Wrapper。工作区构建、签名与验证入口见维护文档。
 
 FileDoctorC 是 ZipXtract 的非官方衍生项目，保留 GPL-3.0-or-later 和第三方声明。感谢 ZipXtract、Liquid-Glass-Android、Haze、7-Zip 及各第三方项目的贡献者。压缩组件的对应源码随仓库提供。
 

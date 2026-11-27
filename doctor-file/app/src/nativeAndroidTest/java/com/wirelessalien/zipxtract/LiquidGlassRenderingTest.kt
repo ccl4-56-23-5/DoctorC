@@ -19,6 +19,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.wirelessalien.zipxtract.activity.MainActivity
 import com.wirelessalien.zipxtract.nativeui.GestureDock
 import com.wirelessalien.zipxtract.nativeui.LiquidGlassView
+import com.wirelessalien.zipxtract.nativeui.Palette
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Assume.assumeTrue
@@ -153,6 +154,71 @@ class LiquidGlassRenderingTest{
             assertEquals(1f,dock.scaleX);assertEquals(1f,dock.scaleY)
             val now=SystemClock.uptimeMillis()
             android.view.MotionEvent.obtain(now,now,android.view.MotionEvent.ACTION_CANCEL,0f,0f,0).also{dock.dispatchTouchEvent(it);it.recycle()}
+        }
+    }
+
+    @Test fun flatBackdropDoesNotProduceABrightRingAroundEitherDockControl() {
+        lateinit var target: ViewGroup
+        lateinit var controls: List<LiquidGlassView>
+        lateinit var fixture: View
+        var visibility = emptyList<Pair<View, Int>>()
+        var density = 1f
+        var dark = false
+        try {
+            scenario.onActivity { activity ->
+                density = activity.resources.displayMetrics.density
+                dark = Palette(activity).dark
+                target = field(activity, "target")
+                controls = listOf(field(activity, "dock"), field(activity, "searchDock"))
+                fixture = View(activity).apply {
+                    setBackgroundColor(if (dark) Color.rgb(34, 38, 50) else Color.rgb(234, 238, 244))
+                }
+                target.addView(fixture, FrameLayout.LayoutParams(-1, -1))
+                visibility = controls.flatMap { control ->
+                    (0 until control.childCount).map { index ->
+                        control.getChildAt(index).let { it to it.visibility }
+                    }
+                }
+                visibility.forEach { (child, _) -> child.visibility = View.INVISIBLE }
+                controls.forEach(View::invalidate)
+            }
+            settle()
+            val rects = mutableListOf<Rect>()
+            scenario.onActivity {
+                for (control in controls) {
+                    assertTrue("Dock GPU lens inactive: ${control.liquidGlassFailure}", control.isLiquidGlassRendering)
+                    rects.add(bounds(control))
+                }
+            }
+            val frame = screenshot()
+            try {
+                fun brightness(x: Int, y: Int): Int = frame.getPixel(x, y).let {
+                    (Color.red(it) + Color.green(it) + Color.blue(it)) / 3
+                }
+                val edgePixels = (3 * density).roundToInt().coerceAtLeast(2)
+                for (rect in rects) {
+                    val x = rect.centerX()
+                    val y = rect.centerY()
+                    val center = brightness(x, y)
+                    val brightest = (0 until edgePixels).maxOf { d ->
+                        maxOf(
+                            brightness(rect.left + d, y),
+                            brightness(rect.right - 1 - d, y),
+                            brightness(x, rect.top + d),
+                            brightness(x, rect.bottom - 1 - d)
+                        )
+                    }
+                    val limit = if (dark) 36 else 24
+                    assertTrue("Bright rim at $rect: edge=$brightest center=$center", brightest - center <= limit)
+                }
+            } finally {
+                frame.recycle()
+            }
+        } finally {
+            if (::scenario.isInitialized) scenario.onActivity {
+                if (visibility.isNotEmpty()) target.removeView(fixture)
+                visibility.forEach { (child, previous) -> child.visibility = previous }
+            }
         }
     }
 

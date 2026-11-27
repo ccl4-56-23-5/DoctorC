@@ -21,9 +21,9 @@ internal class HazeDockMaterial(context: Context, private val density: Float) {
 
     init {
         val dark = palette.dark
-        rim.setFloatUniform("specularIntensity", if (dark) .70f else .76f)
+        rim.setFloatUniform("specularIntensity", if (dark) .14f else .18f)
         rim.setFloatUniform("specularExponent", 18f)
-        rim.setColorUniform("edgeShadow", if (dark) 0x73000000 else 0x58445874)
+        rim.setColorUniform("edgeShadow", if (dark) 0x26000000 else 0x24445874)
     }
 
     private fun RuntimeShader.configureOptics() {
@@ -62,8 +62,10 @@ internal class HazeDockMaterial(context: Context, private val density: Float) {
         rim.setFloatUniform("materialSize", w, h)
         rim.setFloatUniform("cornerRadii", edge, edge, edge, edge)
         rim.setFloatUniform("sampleStep", 2f)
-        rim.setFloatUniform("edgeSoftness", 2.3f * density)
-        rim.setFloatUniform("lightPosition", w * .38f, h * .46f)
+        rim.setFloatUniform("edgeSoftness", 1.15f * density)
+        // The light must be outside the silhouette. An interior light faces the
+        // inward normals on every side and makes a bright ring on flat backgrounds.
+        rim.setFloatUniform("lightPosition", -h, -h)
 
         return RenderEffect.createRuntimeShaderEffect(optic, "content")
     }

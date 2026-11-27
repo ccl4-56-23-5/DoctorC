@@ -4,7 +4,7 @@ DoctorC 提供 Android 文件管理与局域网互传，以及本地阅读、播
 
 ## 软件与下载
 
-- [FileDoctorC（doctor-file）](doctor-file/) · Android 文件管理、压缩解压与局域网互传。[下载 1.2.0+34 ARM64](https://github.com/ccl4-56-23-5/DoctorC/releases/tag/filedoctorc-v1.2.0%2B34)
+- [FileDoctorC（doctor-file）](doctor-file/) · Android 文件管理、压缩解压与局域网互传。[下载 1.2.1+35 ARM64](https://github.com/ccl4-56-23-5/DoctorC/releases/tag/filedoctorc-v1.2.1%2B35)
 - [MookDoctorC（doctor-mook）](doctor-mook/) · Android 本地阅读、播客及音乐播放器，支持通过 FileDoctorC 迁移资料。[下载 Android APK 1.0.24+33](https://github.com/ccl4-56-23-5/DoctorC/releases/tag/mookdoctorc-v1.0.24%2B33)
   - [CLM Studio](doctor-mook/clm-studio/) · MookDoctorC 配套的 Windows 音频封装工具，在同一发行页下载 [Windows 安装包 0.2.1+5](https://github.com/ccl4-56-23-5/DoctorC/releases/tag/mookdoctorc-v1.0.24%2B33)。
 

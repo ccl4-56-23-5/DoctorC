@@ -49,8 +49,8 @@ android {
         applicationId "local.sevenzip.android"
         minSdk 24
         targetSdk 35
-        versionCode 35
-        versionName "1.2.0+34"
+        versionCode 36
+        versionName "1.2.1+35"
         resourceConfigurations += ['en', 'zh-rCN']
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
