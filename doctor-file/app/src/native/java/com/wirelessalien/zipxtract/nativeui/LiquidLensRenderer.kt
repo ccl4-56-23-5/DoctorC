@@ -9,8 +9,6 @@
 package com.wirelessalien.zipxtract.nativeui
 
 import android.graphics.Canvas
-import android.graphics.ColorMatrix
-import android.graphics.ColorMatrixColorFilter
 import android.graphics.Paint
 import android.graphics.RenderEffect
 import android.graphics.RenderNode
@@ -24,7 +22,9 @@ import kotlin.math.ceil
 @RequiresApi(33)
 internal class LiquidLensRenderer(private val density:Float){
     private val node=RenderNode("Liquid glass background")
-    private val backdrops=mutableMapOf<LiquidGlassStyle,RenderEffect>()
+    private val legacyBackdrop by lazy { RenderEffect.createBlurEffect(2 * density, 2 * density, Shader.TileMode.CLAMP) }
+    private var haze: HazeDockMaterial? = null
+    private var lastStyle: LiquidGlassStyle? = null
     private val shadowPaint=Paint(Paint.ANTI_ALIAS_FLAG)
     private var shadow:RenderNode?=null
     private var shadowWidth=0
@@ -37,17 +37,6 @@ internal class LiquidLensRenderer(private val density:Float){
     private val ownLocation=IntArray(2)
     private val sourceLocation=IntArray(2)
     var failure:String?=null;private set
-
-    private fun backdrop(style:LiquidGlassStyle):RenderEffect=backdrops.getOrPut(style){
-        val radius=style.blurDp*density
-        val gaussian=RenderEffect.createBlurEffect(radius,radius,Shader.TileMode.CLAMP)
-        if(style==LiquidGlassStyle.DEFAULT)gaussian else {
-            // HWUI applies the inner effect first. Match the reference's saturation before blur.
-            val matrix=ColorMatrix().apply{setSaturation(1.5f)}
-            val vibrancy=RenderEffect.createColorFilterEffect(ColorMatrixColorFilter(matrix))
-            RenderEffect.createChainEffect(gaussian,vibrancy)
-        }
-    }
 
     private fun drawShadow(canvas:Canvas,w:Int,h:Int,dark:Boolean){
         val shadowRadius=24f*density
@@ -77,33 +66,38 @@ internal class LiquidLensRenderer(private val density:Float){
         // The optical silhouette may exceed the layout capsule. Retain real source pixels there.
         val margin=ceil((if(p.style==LiquidGlassStyle.DEFAULT)30f else 40f)*density).toInt()
         try{
-            val effect=shader?:RuntimeShader(LENS).also{shader=it}
-            if(lastParams!=p||lastWidth!=w||lastHeight!=h){
-                effect.setFloatUniform("size",w.toFloat(),h.toFloat())
-                effect.setFloatUniform("margin",margin.toFloat())
-                effect.setFloatUniform("bevel",p.bevelDp*density)
-                effect.setFloatUniform("refractPx",p.refractionDp*density)
-                effect.setFloatUniform("strength",p.strength)
-                effect.setFloatUniform("dark",if(p.dark)1f else 0f)
-                effect.setFloatUniform("opacity",p.opacity)
-                effect.setFloatUniform("selection",p.lensX,p.lensY,p.lensHalfWidth,p.lensHalfHeight)
-                effect.setFloatUniform("selectionOverflow",if(p.selectionOverflow)1f else 0f)
-                effect.setFloatUniform("selectionRefractPx",p.selectionRefractionDp*density)
-                effect.setFloatUniform("touch",p.touchX,p.touchY)
-                effect.setFloatUniform("press",if(p.pressed)1f else 0f)
-                effect.setFloatUniform("style",p.style.ordinal.toFloat())
-                effect.setFloatUniform("density",density)
-                // Gaussian-blur the independent background BEFORE refraction/tint and silhouette.
-                // Blurring the final view would also soften the rim and child labels/icons.
+            if (p.style == LiquidGlassStyle.HAZE_DOCK) {
+                val material = haze ?: HazeDockMaterial(glass.context, density).also { haze = it }
+                if (lastStyle != p.style || lastWidth != w || lastHeight != h) {
+                    node.setRenderEffect(material.effect(w, h, margin))
+                }
+            } else if (lastStyle != p.style || lastParams != p || lastWidth != w || lastHeight != h) {
+                val effect = shader ?: RuntimeShader(LENS).also { shader = it }
+                effect.setFloatUniform("size", w.toFloat(), h.toFloat())
+                effect.setFloatUniform("margin", margin.toFloat())
+                effect.setFloatUniform("bevel", p.bevelDp * density)
+                effect.setFloatUniform("refractPx", p.refractionDp * density)
+                effect.setFloatUniform("strength", p.strength)
+                effect.setFloatUniform("dark", if (p.dark) 1f else 0f)
+                effect.setFloatUniform("opacity", p.opacity)
+                effect.setFloatUniform("selection", p.lensX, p.lensY, p.lensHalfWidth, p.lensHalfHeight)
+                effect.setFloatUniform("selectionOverflow", if (p.selectionOverflow) 1f else 0f)
+                effect.setFloatUniform("selectionRefractPx", p.selectionRefractionDp * density)
+                effect.setFloatUniform("touch", p.touchX, p.touchY)
+                effect.setFloatUniform("press", if (p.pressed) 1f else 0f)
                 node.setRenderEffect(RenderEffect.createChainEffect(
-                    RenderEffect.createRuntimeShaderEffect(effect,"content"),backdrop(p.style)))
-                lastParams=p;lastWidth=w;lastHeight=h
+                    RenderEffect.createRuntimeShaderEffect(effect, "content"), legacyBackdrop))
             }
+            lastStyle = p.style
+            lastParams = p
+            lastWidth = w
+            lastHeight = h
             glass.getLocationOnScreen(ownLocation);source.getLocationOnScreen(sourceLocation)
             val dx=ownLocation[0]-sourceLocation[0];val dy=ownLocation[1]-sourceLocation[1]
             node.setPosition(-margin,-margin,w+margin,h+margin)
             val recording=node.beginRecording(w+margin*2,h+margin*2)
             try{
+                if (p.style == LiquidGlassStyle.HAZE_DOCK) recording.drawColor(checkNotNull(haze).containerColor)
                 recording.translate((margin-dx).toFloat(),(margin-dy).toFloat())
                 // Hardware display-list recording only. Target is a sibling subtree excluding this glass.
                 // The source records its child RenderNodes. Toolbar source already contains its header blur.
@@ -111,6 +105,7 @@ internal class LiquidLensRenderer(private val density:Float){
             }finally{node.endRecording()}
             if(p.style!=LiquidGlassStyle.DEFAULT)drawShadow(canvas,w,h,p.dark)
             canvas.drawRenderNode(node)
+            if (p.style == LiquidGlassStyle.HAZE_DOCK) checkNotNull(haze).drawRim(canvas, w, h)
             return true
         }catch(e:RuntimeException){
             failure=e.javaClass.simpleName+": "+e.message
@@ -120,7 +115,7 @@ internal class LiquidLensRenderer(private val density:Float){
     }
     fun release(){
         node.discardDisplayList();shadow?.discardDisplayList();shadow=null
-        shader=null;lastParams=null;shadowWidth=0;shadowHeight=0
+        shader=null;haze=null;lastStyle=null;lastParams=null;shadowWidth=0;shadowHeight=0
     }
 
     private companion object{
@@ -138,8 +133,6 @@ internal class LiquidLensRenderer(private val density:Float){
             uniform float selectionRefractPx;
             uniform float2 touch;
             uniform float press;
-            uniform float style;
-            uniform float density;
 
             float roundedBox(float2 p,float2 halfSize,float r){
                 float2 q=abs(p)-halfSize+r;
@@ -162,51 +155,12 @@ internal class LiquidLensRenderer(private val density:Float){
                 return n/max(length(n),0.0001);
             }
 
-            // Displacement is zero at refraction height and grows toward the real capsule edge.
-            float circularSlope(float d,float height){
-                float x=clamp(1.0+d/height,0.0,1.0);
-                return 1.0-sqrt(1.0-x*x);
-            }
-
-            float normalCdf(float x){
-                // Express the tanh approximation with exp, available in Android RuntimeShader.
-                float z=clamp(x,-5.0,5.0);
-                return 1.0/(1.0+exp(-1.59576912*(z+0.044715*z*z*z)));
-            }
-
-            half4 commentGlass(float2 coord,float2 p,float d,float cover,float2 n){
-                float2 offset=-n*circularSlope(d,bevel)*refractPx;
-                if(selection.z>1.0&&selection.w>1.0){
-                    float sd=lens(p);
-                    // The movable selection refracts near its inner edge with gesture-dependent strength.
-                    offset-=lensNormal(p)*circularSlope(sd,7.0*density)
-                        *selectionRefractPx*(1.0-smoothstep(0.0,density,sd));
-                }
-                float2 hi=size+float2(margin*2.0-1.0);
-                float4 sample=content.eval(clamp(coord+offset,float2(1.0),hi));
-                float3 surface=float3(1.0-dark);
-                float3 col=mix(sample.rgb+surface*(1.0-sample.a),surface,mix(0.60,0.28,dark));
-
-                // A 0.5dp inward stroke with the 0.25dp reference blur, in additive white.
-                float sigma=0.57735*0.25*density+0.5;
-                float edge=normalCdf((d+0.5*density)/sigma)-normalCdf(d/sigma);
-                float highlight=0.38;
-                if(style>1.5){
-                    highlight=0.50*abs(dot(n,float2(0.70710678,0.70710678)));
-                }
-                float innerShadow=dark*0.15*0.12*exp(min(0.0,d)/(4.0*density));
-                col=clamp(col*(1.0-innerShadow)+edge*highlight*mix(1.0,0.58,dark),0.0,1.0);
-                cover*=opacity;
-                return half4(half3(col*cover),half(cover));
-            }
-
             half4 main(float2 coord){
                 float2 p=coord-float2(margin);
                 float d=shape(p);
                 float cover=clamp(0.5-d/1.2,0.0,1.0);
                 if(cover<0.004)return half4(0.0);
                 float2 n=shellNormal(p);
-                if(style>0.5)return commentGlass(coord,p,d,cover,n);
                 float t=clamp(-d/max(bevel,1.0),0.0,1.0);
                 float slope=(pow(1.0+4.0*t,-1.7)-pow(5.0,-1.7))/(1.0-pow(5.0,-1.7));
                 // Inward normal sampling produces a compressed, mirrored background edge band.

@@ -56,7 +56,7 @@ internal data class LanDevice(val model: String, val brand: String, val shape: L
 }
 
 internal data class LanPeer(val endpoint: LanEndpoint, val fingerprint: String, val device: LanDevice,
-                            val supportsTree: Boolean)
+                            val supportsTree: Boolean, val route: LanSubnet)
 
 /** LAN tasks and the receiving socket belong to the app process, independently of page lifetimes. */
 internal class LanForeground(private val context: Context) {
@@ -74,13 +74,20 @@ internal class LanForeground(private val context: Context) {
     private var visible = 0
     private var device: LanDevice? = null
     private var networkWatched = false
-    private var server: LanReceiver? = null
-    private var advertisement: LanAdvertisement? = null
-    private var subnet: LanSubnet? = null
-    private var advertisedDevice: LanDevice? = null
-    private var generation = 0
-    private var identity: LanTls.Identity? = null
-    private val refresh = Runnable { scope.launch { reconcile() } }
+    private class Listener(val receiver: LanReceiver, val fingerprint: String) {
+        var advertisement: LanAdvertisement? = null
+        var advertisedDevice: LanDevice? = null
+    }
+
+    private val listeners = linkedMapOf<LanSubnet, Listener>()
+    private var pendingRoute: LanSubnet? = null
+    private var receivingRoute: LanSubnet? = null
+    private val refreshPoll = Runnable { schedule() }
+    private val refresh = Runnable { scope.launch {
+        reconcile()
+        main.removeCallbacks(refreshPoll)
+        if (needsListener()) main.postDelayed(refreshPoll, 1800)
+    } }
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onCapabilitiesChanged(network: Network, capabilities: NetworkCapabilities) = schedule()
         override fun onLost(network: Network) = schedule()
@@ -106,7 +113,9 @@ internal class LanForeground(private val context: Context) {
             networkWatched = runCatching {
                 connectivity.registerNetworkCallback(NetworkRequest.Builder()
                     .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                    .addTransportType(NetworkCapabilities.TRANSPORT_ETHERNET).build(), networkCallback)
+                    .addTransportType(NetworkCapabilities.TRANSPORT_ETHERNET).apply {
+                        if (Build.VERSION.SDK_INT >= 31) addTransportType(NetworkCapabilities.TRANSPORT_USB)
+                    }.build(), networkCallback)
             }.isSuccess
         } else if (!needsListener() && networkWatched) {
             runCatching { connectivity.unregisterNetworkCallback(networkCallback) }
@@ -128,9 +137,8 @@ internal class LanForeground(private val context: Context) {
         scope.launch {
             val result = try {
                 val client = withContext(Dispatchers.IO) {
-                    val network = lanSubnets(context).firstOrNull { it.contains(peer.endpoint.address) }?.network
-                        ?: throw IOException("设备已离开当前局域网")
-                    LanSender(peer.endpoint, peer.fingerprint, network, peer.supportsTree)
+                    if (peer.route !in lanSubnets(context)) throw IOException("所选连接已断开，请重新选择设备")
+                    LanSender(peer.endpoint, peer.fingerprint, peer.route, peer.supportsTree)
                 }
                 if (_sending.value?.cancelling == true) LanBatchResult(error = "发送已取消")
                 else {
@@ -167,7 +175,9 @@ internal class LanForeground(private val context: Context) {
         if (_pending.value !== offer || offer.decision.isDone) return false
         val previous = _receiving.value
         _receiving.value = LanTask(offer.id, "接收自 ${offer.alias}", LanProgress("正在准备接收…"))
+        receivingRoute = pendingRoute
         if (offer.decision.complete(folder)) return true
+        receivingRoute = null
         _receiving.value = previous
         return false
     }
@@ -190,82 +200,75 @@ internal class LanForeground(private val context: Context) {
         else context.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
 
     private suspend fun reconcile() = mutex.withLock {
-        val target = if (needsListener() && storageAllowed()) lanSubnets(context).firstOrNull() else null
         val details = device
-        if (target == subnet && (target == null || details == advertisedDevice)) return@withLock
-        // A fold posture update changes the advertised card, without interrupting a batch.
-        if (target != null && target == subnet && server != null && details != null) {
-            advertise(details)
-            return@withLock
+        val targets = if (needsListener() && storageAllowed() && details != null) lanSubnets(context) else emptyList()
+        val removed = listeners.keys.filter { it !in targets }
+        val stopped = removed.mapNotNull { route ->
+            if (pendingRoute == route) _pending.value?.decision?.complete(null)
+            if (receivingRoute == route) {
+                receivingRoute = null
+                _receiving.update { if (it?.active == true) {
+                    it.finish(LanBatchResult(error = "接收连接已断开或存储权限已关闭", countsConfirmed = false))
+                } else it }
+            }
+            listeners.remove(route)?.also { it.advertisement?.close() }?.receiver
         }
-        val round = ++generation
-        advertisement?.close()
-        advertisement = null
-        advertisedDevice = null
-        _pending.value?.decision?.complete(null)
-        _pending.value = null
-        val previous = server
-        _receiving.update {
-            if (it?.active == true) it.finish(LanBatchResult(error = "接收已中断，请确认网络和存储授权", countsConfirmed = false))
-            else it
-        }
+        if (stopped.isNotEmpty()) withContext(Dispatchers.IO) { stopped.forEach(LanReceiver::close) }
         watchNetwork()
-        server = null
-        subnet = null
-        val started = withContext(Dispatchers.IO) {
-            previous?.close()
-            if (target == null || details == null) return@withContext null
-            runCatching {
-                val key = LanTls.receiver()
-                val listener = LanReceiver(target, key,
-                    onOffer = { offer -> scope.launch {
-                        if (round != generation || visible == 0 || offer.decision.isDone) {
-                            offer.decision.complete(null)
-                        } else {
-                            _pending.value = offer
-                            offer.decision.whenComplete { _, _ -> scope.launch {
-                                if (_pending.value === offer) _pending.value = null
-                            } }
-                        }
-                    } },
-                    onProgress = { id, progress -> updateProgress(_receiving, id, progress) },
-                    onResult = { id, result -> scope.launch {
-                        if (result.files > 0 || result.folders > 0) EventBus.emit(AppEvent.LanFilesReceived)
-                        if (round == generation) {
-                            _receiving.update { if (it?.id == id && it.active) it.finish(result) else it }
-                            watchNetwork()
-                            schedule()
-                        }
-                    } }
-                )
-                try {
-                    listener.start(20_000)
-                    listener to key
-                } catch (e: Exception) {
-                    listener.close()
-                    throw e
-                }
-            }.getOrNull()
-        }
-        if (started != null) {
-            if (!needsListener()) {
-                withContext(Dispatchers.IO) { started.first.close() }
-            } else {
-                server = started.first
-                identity = started.second
-                subnet = target
-                advertise(details!!)
+        if (details == null || !needsListener()) return@withLock
+        for (route in targets) {
+            val listener = listeners[route] ?: startListener(route)?.also { listeners[route] = it } ?: continue
+            if (visible == 0) {
+                listener.advertisement?.close()
+                listener.advertisement = null
+            } else if (listener.advertisement == null || listener.advertisedDevice != details) {
+                listener.advertisement?.close()
+                listener.advertisement = runCatching {
+                    LanAdvertisement(context.getSystemService(NsdManager::class.java), listener.receiver.endpoint,
+                        route, details, listener.fingerprint)
+                }.getOrNull()
+                listener.advertisedDevice = details
             }
         }
     }
 
-    private fun advertise(details: LanDevice) {
-        val endpoint = server?.endpoint ?: return
-        val fingerprint = identity?.fingerprint ?: return
-        advertisement?.close()
-        advertisement = runCatching {
-            LanAdvertisement(context.getSystemService(NsdManager::class.java), endpoint, details, fingerprint)
+    private suspend fun startListener(route: LanSubnet): Listener? = withContext(Dispatchers.IO) {
+        runCatching {
+            val identity = LanTls.receiver()
+            val receiver = LanReceiver(route, identity,
+                onOffer = { offer -> scope.launch {
+                    if (route !in listeners || visible == 0 || offer.decision.isDone ||
+                        _pending.value?.decision?.isDone == false || _receiving.value?.active == true) {
+                        offer.decision.complete(null)
+                    } else {
+                        pendingRoute = route
+                        _pending.value = offer
+                        offer.decision.whenComplete { _, _ -> scope.launch {
+                            if (_pending.value === offer) {
+                                _pending.value = null
+                                pendingRoute = null
+                            }
+                        } }
+                    }
+                } },
+                onProgress = { id, progress -> updateProgress(_receiving, id, progress) },
+                onResult = { id, result -> scope.launch {
+                    if (result.files > 0 || result.folders > 0) EventBus.emit(AppEvent.LanFilesReceived)
+                    if (_receiving.value?.id == id) {
+                        receivingRoute = null
+                        _receiving.update { if (it?.id == id && it.active) it.finish(result) else it }
+                        watchNetwork()
+                        schedule()
+                    }
+                } }
+            )
+            try {
+                receiver.start(20_000)
+                Listener(receiver, identity.fingerprint)
+            } catch (e: Exception) {
+                receiver.close()
+                throw e
+            }
         }.getOrNull()
-        advertisedDevice = details
     }
 }

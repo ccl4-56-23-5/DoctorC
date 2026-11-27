@@ -8,6 +8,11 @@ import com.wirelessalien.zipxtract.lan.LanCompleted
 import com.wirelessalien.zipxtract.lan.LanBatchProgress
 import com.wirelessalien.zipxtract.lan.LanDestination
 import com.wirelessalien.zipxtract.lan.LanFile
+import com.wirelessalien.zipxtract.lan.LanLink
+import com.wirelessalien.zipxtract.lan.LanReceiver
+import com.wirelessalien.zipxtract.lan.LanSender
+import com.wirelessalien.zipxtract.lan.LanTls
+import com.wirelessalien.zipxtract.lan.lanSubnets
 import com.wirelessalien.zipxtract.lan.LanTreeDestination
 import com.wirelessalien.zipxtract.lan.LanTreePlan
 import org.junit.After
@@ -15,6 +20,7 @@ import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Assume.assumeNotNull
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.ByteArrayOutputStream
@@ -51,6 +57,40 @@ class LanDestinationDeviceTest {
         assertEquals(setOf(existing.name, target.name), folder.list()!!.toSet())
         assertArrayEquals(bytes, target.readBytes())
         assertEquals("existing", existing.readText())
+    }
+
+    @Test fun boundWiredSocketStreamsAndVerifiesPayloadOnLocalInterface() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val local = lanSubnets(context).firstOrNull()
+        assumeNotNull(local)
+        // Use the local interface address to exercise the downstream USB socket path without cable hardware.
+        val route = checkNotNull(local).copy(network = null, link = LanLink.WIRED)
+        val identity = LanTls.receiver()
+        val target = File(folder, "received").apply { check(mkdir()) }
+        val source = File(folder, "stream.bin").apply {
+            outputStream().use { stream -> repeat(16) { stream.write(bytes) } }
+        }
+        val receiver = LanReceiver(route, identity, { it.decision.complete(target) }, { _, _ -> }, { _, _ -> })
+        receiver.use {
+            it.start(5000)
+            val result = LanSender(it.endpoint, identity.fingerprint, route, supportsTree = true)
+                .send(listOf(source), "FileDoctorC QA") {}
+            assertEquals(null, result.error)
+            assertEquals(1L, result.files)
+            fun digest(file: File): List<Byte> {
+                val hash = MessageDigest.getInstance("SHA-256")
+                file.inputStream().use { input ->
+                    val buffer = ByteArray(64 * 1024)
+                    while (true) {
+                        val count = input.read(buffer)
+                        if (count == -1) break
+                        hash.update(buffer, 0, count)
+                    }
+                }
+                return hash.digest().toList()
+            }
+            assertEquals(digest(source), digest(File(target, source.name)))
+        }
     }
 
     @Test fun shortUploadAndHashMismatchLeaveNoFiles() {

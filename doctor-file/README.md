@@ -1,12 +1,12 @@
 # FileDoctorC
 
-FileDoctorC 是 Android 文件管理、压缩解压和局域网互传工具。当前 Release 为 **1.1.5+30**，支持 Android 7.0 及以上。签名 APK 支持覆盖安装相同应用 ID 和签名的版本。
+FileDoctorC 是 Android 文件管理、压缩解压和设备互传工具。稳定版为 **1.1.5+30**，测试版为 **1.1.6+31**，支持 Android 7.0 及以上。签名 APK 支持覆盖安装相同应用 ID 和签名的版本。
 
 ## 文件管理
 
 - 从「文件」浏览本机目录，使用书签回到常用路径。搜索可组合文件名、类型和来源，也可限定在当前目录。
 - 长按进入多选，可逐项点击、拖选或全选，再压缩、复制、移动、批量重命名，或执行其他文件操作。搜索中的操作完成后会刷新原结果。
-- 批量重命名可预览目标名称。日期可取文件修改时间、EXIF 拍摄时间，或优先 EXIF 后回退到文件修改时间。「同步照片时间」逐张对齐文件修改时间，保留照片正文和 EXIF。照片缺少时区时使用手机当前时区。
+- 批量重命名可预览目标名称。短按已有规则可直接编辑决定新名称的字段或方式。日期可取文件修改时间、EXIF 拍摄时间，或优先 EXIF 后回退到文件修改时间。「同步照片时间」逐张对齐文件修改时间，保留照片正文和 EXIF。照片缺少时区时使用手机当前时区。
 - Android 11 及以上按需开启「所有文件访问」。Android/media 可直接浏览。Android/data 和 Android/obb 取决于设备与系统提供的文件路径，受限时应用说明原因并展示可用位置。
 
 ## 压缩与解压
@@ -15,10 +15,10 @@ FileDoctorC 是 Android 文件管理、压缩解压和局域网互传工具。�
 - 可预览归档内容后解压到目标目录。程序检查归档路径与分卷完整性，处理密码错误、同名冲突和取消。输出先写入暂存，再在校验后发布。
 - 启用压缩后删除源文件时，程序先核验归档，再复查源文件状态。建议在预览中核对选中的文件和目标位置。
 
-## 局域网互传
+## 无线和有线互传
 
-1. 两端连接同一 IPv4 局域网并打开 FileDoctorC。
-2. 发送端长按选中一个或多个文件、文件夹，点「传输」，选择发现的设备。
+1. 两端接入互相可达的 IPv4 局域网并打开 FileDoctorC。设备可走 Wi‑Fi、以太网或 Android 系统已建立的 USB 网络。
+2. 发送端长按选中一个或多个文件、文件夹，点「传输」，选择发现的设备。有线目标在同一列表中显示，右上角带有插头标记。
 3. 接收端确认请求及保存目录。确认后两端仍可浏览和搜索，进度、取消入口和结果可从相应页面查看。
 4. 混合批次保留子目录和空文件夹，接收端逐文件核对 SHA-256，校验后发布文件并尝试恢复文件时间。遇到同名项目自动编号。发送和接收设备均需支持文件夹传输。
 
@@ -28,8 +28,8 @@ FileDoctorC 是 Android 文件管理、压缩解压和局域网互传工具。�
 
 ## 安装、构建与许可
 
-从 [FileDoctorC 发行页](https://github.com/ccl4-56-23-5/DoctorC/releases/tag/filedoctorc-v1.1.5%2B30)获取签名 APK，安装前可与同页 SHA-256 校验表比对。源码使用 Android SDK Platform 37、Build Tools 37.0.0、NDK 28.2.13676358、CMake 3.22.1、JDK 21 和 Gradle Wrapper。工作区构建、签名与验证入口见维护文档。
+从[测试版](https://github.com/ccl4-56-23-5/DoctorC/releases/tag/filedoctorc-v1.1.6%2B31)或[稳定版](https://github.com/ccl4-56-23-5/DoctorC/releases/tag/filedoctorc-v1.1.5%2B30)发布页获取签名 APK，安装前可与同页 SHA-256 校验表比对。源码使用 Android SDK Platform 37、Build Tools 37.0.0、NDK 28.2.13676358、CMake 3.22.1、JDK 21 和 Gradle Wrapper。工作区构建、签名与验证入口见维护文档。
 
-FileDoctorC 是 ZipXtract 的非官方衍生项目，保留 GPL-3.0-or-later 和第三方声明。感谢 ZipXtract、Liquid-Glass-Android、7-Zip 及各第三方项目的贡献者。压缩组件的对应源码随仓库提供。
+FileDoctorC 是 ZipXtract 的非官方衍生项目，保留 GPL-3.0-or-later 和第三方声明。感谢 ZipXtract、Liquid-Glass-Android、Haze、7-Zip 及各第三方项目的贡献者。压缩组件的对应源码随仓库提供。
 
 [维护文档](维护文档.md) · [设定记录](设定记录.md) · [开发说明](开发说明.md) · [开源声明与致谢](THIRD_PARTY.md)

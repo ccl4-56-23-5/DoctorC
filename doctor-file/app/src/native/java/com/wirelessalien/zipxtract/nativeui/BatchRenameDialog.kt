@@ -293,7 +293,7 @@ object BatchRenameDialog {
             topMargin = c.dp(top); bottomMargin = c.dp(bottom)
         }
         private fun action(text: String, key: String, primary: Boolean = false, click: () -> Unit): TextView =
-            c.label(text, 14f, if (primary) Color.WHITE else p.text, primary).apply {
+            c.label(text, 14f, if (primary) p.onAccent else p.text, primary).apply {
                 tag = "batch_rename_$key"; gravity = Gravity.CENTER; minHeight = c.dp(48)
                 setPadding(c.dp(5), c.dp(9), c.dp(5), c.dp(9))
                 background = p.background(if (primary) p.blue else p.surface, c.dp(13).toFloat())
@@ -320,13 +320,20 @@ object BatchRenameDialog {
                 val row = LinearLayout(c).apply {
                     tag = "batch_rename_rule_$index"; gravity = Gravity.CENTER_VERTICAL
                     minimumHeight = c.dp(65); setPadding(c.dp(10), c.dp(6), c.dp(5), c.dp(6))
-                    background = p.background(if (index == selected) p.selected else p.surface, c.dp(13).toFloat()).apply {
-                        if (index == selected) setStroke(c.dp(1), p.blue)
-                    }
+                    background = p.pressable(if (index == selected) p.selected else p.surface, c.dp(15).toFloat())
                     isClickable = true; isFocusable = true
-                    contentDescription = "选择第 ${index + 1} 条${rule.kind.title}规则"
-                    setOnClickListener { if (mutable()) { selected = index; renderRules() } }
-                    setOnLongClickListener { if (mutable()) { selected = index; openEditor(index) }; true }
+                    contentDescription = "编辑第 ${index + 1} 条${rule.kind.title}规则"
+                    setOnClickListener {
+                        if (mutable()) {
+                            selected = index
+                            menuAnchor()
+                            openEditor(index, focusOutput = true)
+                        }
+                    }
+                    setOnLongClickListener {
+                        if (mutable()) { selected = index; renderRules() }
+                        true
+                    }
                 }
                 val text = column().apply {
                     addView(c.label("${index + 1} · ${rule.name.ifBlank { rule.kind.title }}${if (!rule.enabled) "（已禁用）" else ""}", 14f, p.text, true))
@@ -426,7 +433,7 @@ object BatchRenameDialog {
             return toggle
         }
 
-        private fun openEditor(index: Int, focusName: Boolean = false) {
+        private fun openEditor(index: Int, focusName: Boolean = false, focusOutput: Boolean = false) {
             if (!mutable() || editor != null || (index < 0 && rules.size >= 64)) return
             var draft = rules.getOrNull(index) ?: Rule(Kind.INSERT, mode = "suffix")
             val modal = MotionDialog(c, R.style.NativeTheme).apply { morphFrom = if (index < 0) add else if (focusName) renameRule else edit }
@@ -618,19 +625,47 @@ object BatchRenameDialog {
                     }.fold({ rule ->
                         if (index in rules.indices) { rules[index] = rule; selected = index }
                         else { rules.add(rule); selected = rules.lastIndex }
-                        hideKeyboard(modal); modal.close {}; rulesChanged()
+                        hideKeyboard(modal)
+                        modal.close { if (!closed) rulesChanged() }
                     }, { failure -> error.text = failure.message ?: "请检查参数"; error.visibility = View.VISIBLE })
                 }
             }
             card.addView(actionRow(cancel, save), lp(-1, -2, top = 7))
-            modal.setOnDismissListener { if (editor === modal) editor = null }
+            modal.setOnDismissListener {
+                if (editor === modal) editor = null
+                if (focusOutput && !closed) renderRules()
+            }
             modal.onBackAction = { consumeIme(modal) }
             val height = minOf(c.dp(720), (c.resources.displayMetrics.heightPixels * .85f).toInt())
-            card.minimumHeight = height; modal.showPanel(card, c.dp(560)); responsive(modal, card, height)
-            if (focusName) fields["name"]?.post {
-                if (!closed && editor === modal) fields["name"]?.let { field ->
-                    field.requestFocus(); field.selectAll()
-                    field.requestRectangleOnScreen(Rect(0, 0, field.width, field.height), true)
+            if (focusOutput) {
+                modal.morphFrom = c.window.decorView.getTag(R.id.native_menu_anchor) as? View
+                c.window.decorView.setTag(R.id.native_menu_anchor, null)
+            }
+            card.minimumHeight = height
+            modal.showPanel(card, c.dp(560))
+            responsive(modal, card, height)
+            val focus = when {
+                focusName -> fields["name"]
+                focusOutput -> {
+                    val key = when (draft.kind) {
+                        Kind.REPLACE, Kind.REGEX, Kind.MAPPING, Kind.REARRANGE, Kind.TRANSLITERATE -> "replacement"
+                        Kind.INSERT, Kind.USER_INPUT, Kind.REMOVE, Kind.EXTENSION, Kind.RANDOM -> "text"
+                        Kind.SERIALIZE -> "start"
+                        Kind.PAD -> "width"
+                        Kind.DATE -> "date_format"
+                        Kind.DELETE -> if (draft.mode == "range") "position" else "count"
+                        Kind.CASE, Kind.CLEANUP, Kind.STRIP -> null
+                    }
+                    key?.let(fields::get) ?: fields["text"] ?: modeChoice
+                }
+                else -> null
+            }
+            focus?.post {
+                if (!closed && editor === modal && focus.isAttachedToWindow) {
+                    if (focus !is EditText) focus.isFocusableInTouchMode = true
+                    focus.requestFocus()
+                    if (focus is EditText) focus.selectAll()
+                    focus.requestRectangleOnScreen(Rect(0, 0, focus.width, focus.height), true)
                 }
             }
         }

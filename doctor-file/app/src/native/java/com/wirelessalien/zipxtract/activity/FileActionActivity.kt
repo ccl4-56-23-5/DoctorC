@@ -4,7 +4,6 @@ import android.app.Activity
 import android.app.Dialog
 import android.content.Intent
 import android.graphics.Color
-import android.net.nsd.NsdManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -189,14 +188,14 @@ abstract class FileActionActivity : Activity() {
             if (dismissed || chosen) return
             content.removeAllViews()
             if (peers.isEmpty()) {
-                content.lanRow(label("正在寻找同一局域网中打开 FileDoctorC 的设备…", 15f, colors.secondary))
+                content.lanRow(emptyState("正在搜索接收设备", "让接收设备保持打开 FileDoctorC", "transfer"))
                 return
             }
             val columns = (minOf(resources.configuration.screenWidthDp, 860) / 154).coerceIn(1, 5)
             peers.chunked(columns).forEach { group ->
                 val row = LinearLayout(this)
                 group.forEach { peer ->
-                    val button = lanDeviceButton(this, peer.device) {
+                    val button = lanDeviceButton(this, peer.device, peer.route.link) {
                         if (!chosen) {
                             chosen = true
                             val started = lan.send(files, peer, pendingRelease)
@@ -226,7 +225,7 @@ abstract class FileActionActivity : Activity() {
         scope.launch {
             try {
                 val own = lan.ownFingerprint()
-                if (!dismissed) discovery = LanDiscovery(getSystemService(NsdManager::class.java), own) { peers ->
+                if (!dismissed) discovery = LanDiscovery(this@FileActionActivity, own) { peers ->
                     runOnUiThread { render(peers) }
                 }
             } catch (e: CancellationException) {
@@ -234,7 +233,7 @@ abstract class FileActionActivity : Activity() {
             } catch (_: Exception) {
                 if (!dismissed) {
                     content.removeAllViews()
-                    content.lanRow(label("设备发现暂不可用，请检查 Wi‑Fi 或有线网络。", 15f, colors.secondary))
+                    content.lanRow(emptyState("暂时无法发现设备", "请检查 Wi‑Fi 或有线网络", "transfer"))
                 }
             }
         }
@@ -367,12 +366,40 @@ abstract class FileActionActivity : Activity() {
         val scroll=ScrollView(this).apply{isVerticalScrollBarEnabled=false;addView(body,FrameLayout.LayoutParams(-1,-2))}
         box.addView(scroll,LinearLayout.LayoutParams(-1,minOf(body.measuredHeight,resources.displayMetrics.heightPixels/2)))
         val buttons=LinearLayout(this).apply{gravity=Gravity.END or Gravity.CENTER_VERTICAL}
-        if(cancel)buttons.addView(label("取消",16f,colors.text).apply{gravity=Gravity.CENTER;minimumHeight=dp(48);isFocusable=true;setOnClickListener{d.dismiss()}},LinearLayout.LayoutParams(0,dp(48),1f))
-        buttons.addView(label(button,16f,if(danger)0xffc1483e.toInt()else colors.blue,true).apply{gravity=Gravity.CENTER;minimumHeight=dp(48);isFocusable=true;setOnClickListener{d.close(action)}},LinearLayout.LayoutParams(if(cancel)0 else dp(92),dp(48),if(cancel)1f else 0f))
+        if (cancel) buttons.addView(label("取消", 15f, colors.text, true).apply {
+            gravity = Gravity.CENTER
+            isFocusable = true
+            background = colors.pressable(colors.surface, dp(14).toFloat())
+            setOnClickListener { d.close {} }
+        }, LinearLayout.LayoutParams(0, dp(48), 1f))
+        val alert = if (colors.dark) 0xffffb7b0.toInt() else 0xffae2e26.toInt()
+        buttons.addView(label(button, 15f, if (danger) alert else colors.onAccent, true).apply {
+            gravity = Gravity.CENTER
+            isFocusable = true
+            background = colors.pressable(if (danger) colors.surface else colors.blue, dp(14).toFloat())
+            setOnClickListener { d.close(action) }
+        }, LinearLayout.LayoutParams(if (cancel) 0 else dp(92), dp(48), if (cancel) 1f else 0f).apply {
+            if (cancel) marginStart = dp(8)
+        })
         box.addView(buttons,LinearLayout.LayoutParams(-1,dp(56)).apply{topMargin=dp(18)})
         d.showPanel(box,width,dimAmount=.12f)
     }
-    protected fun primary(text:String,click:()->Unit)=label(text,17f,Color.WHITE,true).apply{gravity=Gravity.CENTER;background=colors.background(colors.blue,dp(16).toFloat());setOnClickListener{click()};minimumHeight=dp(52);isClickable=true;isFocusable=true}
+    protected fun primary(text:String,click:()->Unit)=label(text,16f,colors.onAccent,true).apply{gravity=Gravity.CENTER;background=colors.pressable(colors.blue,dp(16).toFloat());setOnClickListener{click()};minimumHeight=dp(52);isClickable=true;isFocusable=true}
+    protected fun emptyState(title: String, description: String, icon: String): View = LinearLayout(this).apply {
+        orientation = LinearLayout.VERTICAL
+        gravity = Gravity.CENTER_HORIZONTAL
+        setPadding(dp(24), dp(28), dp(24), dp(28))
+        addView(ImageView(context).apply {
+            setPadding(dp(13), dp(13), dp(13), dp(13))
+            setImageDrawable(Art.drawable(context, icon))
+            background = colors.background(colors.selected, dp(19).toFloat())
+            importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+        }, LinearLayout.LayoutParams(dp(56), dp(56)))
+        addView(label(title, 16f, colors.text, true).apply { gravity = Gravity.CENTER },
+            LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(12) })
+        if (description.isNotBlank()) addView(label(description, 13f, colors.secondary).apply { gravity = Gravity.CENTER },
+            LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(6) })
+    }
     protected fun section(parent:LinearLayout,text:String){parent.addView(label(text,14f,colors.secondary),LinearLayout.LayoutParams(-1,dp(48)).apply{topMargin=dp(8)})}
     protected data class DialogPage(val dialog:MotionDialog,val body:LinearLayout,val outer:LinearLayout)
     protected fun fullDialog(title:String):DialogPage{
@@ -381,7 +408,11 @@ abstract class FileActionActivity : Activity() {
         val outer=LinearLayout(this).apply{orientation=LinearLayout.VERTICAL;setBackgroundColor(colors.page)}
         val head=LinearLayout(this).apply{gravity=Gravity.CENTER_VERTICAL;setPadding(dp(10),0,dp(18),0)}
         head.addView(iconButton("back","返回"){d.onBackPressed()},LinearLayout.LayoutParams(dp(48),dp(56)))
-        head.addView(label(title,20f,colors.text,true),LinearLayout.LayoutParams(0,dp(60),1f))
+        head.addView(label(title,20f,colors.text,true).apply {
+            maxLines = 2
+            ellipsize = TextUtils.TruncateAt.END
+            ViewCompat.setAccessibilityHeading(this, true)
+        }, LinearLayout.LayoutParams(0,dp(60),1f).apply { marginStart = dp(6) })
         outer.addView(head);val body=LinearLayout(this).apply{orientation=LinearLayout.VERTICAL};outer.addView(body,LinearLayout.LayoutParams(-1,0,1f));d.motionContent=outer;d.setContentView(outer)
         return DialogPage(d,body,outer)
     }

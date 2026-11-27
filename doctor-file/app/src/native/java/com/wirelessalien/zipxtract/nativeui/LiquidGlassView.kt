@@ -35,7 +35,8 @@ open class LiquidGlassView(context:Context):BlurView(context){
     private var previousY=Int.MIN_VALUE
     var isLiquidGlassRendering=false;private set
     var liquidGlassFailure:String?=null;private set
-    internal val selectionRefractionPx: Float get() = resources.displayMetrics.density * material.selectionRefractionDp
+    internal val selectionRefractionPx: Float get() =
+        if (material.style == LiquidGlassStyle.DEFAULT) resources.displayMetrics.density * material.selectionRefractionDp else 0f
     /** Toolbar mode samples the already blurred header and has a source-over fallback. */
     var inheritsBackdrop=false;private set
     var glassSurfaceOpacity=1f;private set
@@ -173,14 +174,9 @@ internal data class LiquidGlassOptics(
     val touchX:Float=0f,val touchY:Float=0f,val pressed:Boolean=false,
     val style:LiquidGlassStyle=LiquidGlassStyle.DEFAULT
 ) {
-    val bevelDp:Float get()=if(style==LiquidGlassStyle.DEFAULT)13f+2f*strength else style.bevelDp
-    val refractionDp:Float get()=if(style==LiquidGlassStyle.DEFAULT)11f+8f*strength else style.refractionDp
-    val selectionRefractionDp:Float get()=3f+7f*strength
+    val bevelDp: Float get() = 13f + 2f * strength
+    val refractionDp: Float get() = 11f + 8f * strength
+    val selectionRefractionDp: Float get() = 3f + 7f * strength
 }
 
-/** Optical dimensions of the comment action group and the independent comment button. */
-internal enum class LiquidGlassStyle(val blurDp:Float,val bevelDp:Float,val refractionDp:Float) {
-    DEFAULT(2f,0f,0f),
-    COMMENT_GROUP(4f,16f,32f),
-    COMMENT_BUTTON(2f,12f,24f)
-}
+internal enum class LiquidGlassStyle { DEFAULT, HAZE_DOCK }

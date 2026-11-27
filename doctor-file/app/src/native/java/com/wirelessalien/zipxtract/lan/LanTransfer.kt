@@ -1,7 +1,6 @@
 package com.wirelessalien.zipxtract.lan
 
 import android.os.SystemClock
-import android.net.Network
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.NanoHTTPD.Response.Status
 import org.json.JSONException
@@ -12,7 +11,9 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.Proxy
-import java.net.URL
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.net.Socket
 import java.security.cert.X509Certificate
 import java.util.UUID
 import java.util.concurrent.CompletableFuture
@@ -25,13 +26,20 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
-import javax.net.ssl.HttpsURLConnection
+import javax.net.SocketFactory
+import okhttp3.Call
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
+import okio.BufferedSink
 import javax.net.ssl.SSLHandshakeException
 
 private const val LEGACY_MAX_FILES = 256
 private const val MAX_JSON = 384L * 1024
 private const val APPROVAL_SECONDS = 120L
 private const val IDLE_MILLIS = 30_000L
+private const val WIRED_SOCKET_BUFFER = 1024 * 1024
 
 internal data class LanBatchResult(
     val files: Long = 0,
@@ -130,6 +138,10 @@ internal class LanReceiver(
         val protocols = identity.context.supportedSSLParameters.protocols
             .filter { it == "TLSv1.2" || it == "TLSv1.3" }.toTypedArray()
         makeSecure(identity.context.serverSocketFactory, protocols)
+        if (subnet.link == LanLink.WIRED) {
+            val secure = serverSocketFactory
+            setServerSocketFactory { secure.create().apply { receiveBufferSize = WIRED_SOCKET_BUFFER } }
+        }
         setAsyncRunner(workers)
         // Uploads are streamed from the socket. Disable the HTTP library's body spool.
         setTempFileManagerFactory {
@@ -333,15 +345,28 @@ internal class LanReceiver(
     }
 }
 
-internal class LanSender(private val endpoint: LanEndpoint, private val fingerprint: String, private val network: Network,
+internal class LanSender(private val endpoint: LanEndpoint, private val fingerprint: String, private val route: LanSubnet,
                          private val supportsTree: Boolean) {
     private val tls = LanTls.sender(fingerprint)
+    private val client = OkHttpClient.Builder()
+        .socketFactory(LanSocketFactory(route))
+        .sslSocketFactory(tls.context.socketFactory, tls.trustManager)
+        .hostnameVerifier { host, session ->
+            val certificate = session.peerCertificates.firstOrNull() as? X509Certificate
+            host == endpoint.address.hostAddress && certificate != null && LanTls.matches(fingerprint, certificate)
+        }
+        .proxy(Proxy.NO_PROXY)
+        .followRedirects(false)
+        .retryOnConnectionFailure(false)
+        .connectTimeout(7, TimeUnit.SECONDS)
+        .writeTimeout(35, TimeUnit.SECONDS)
+        .build()
     private val cancelled = AtomicBoolean()
-    private val connection = AtomicReference<HttpsURLConnection?>()
+    private val connection = AtomicReference<Call?>()
 
     fun cancel() {
         cancelled.set(true)
-        connection.get()?.disconnect()
+        connection.get()?.cancel()
     }
 
     fun send(files: List<File>, alias: String, progress: (LanProgress) -> Unit): LanBatchResult {
@@ -421,38 +446,71 @@ internal class LanSender(private val endpoint: LanEndpoint, private val fingerpr
 
     private fun post(route: String, bytes: Long, timeout: Int, cleanup: Boolean = false,
                      write: (OutputStream) -> Unit): JSONObject {
-        val http = network.openConnection(URL("https://$endpoint$LAN_API$route"), Proxy.NO_PROXY) as HttpsURLConnection
-        // The per-connection trust manager validates the user-confirmed certificate fingerprint.
-        http.sslSocketFactory = tls.socketFactory
-        http.hostnameVerifier = javax.net.ssl.HostnameVerifier { host, session ->
-            val certificate = session.peerCertificates.firstOrNull() as? X509Certificate
-            host == endpoint.address.hostAddress && certificate != null && LanTls.matches(fingerprint, certificate)
+        val mediaType = (if (route == "/prepare-upload") "application/json" else "application/octet-stream").toMediaType()
+        val body = object : RequestBody() {
+            override fun contentType() = mediaType
+            override fun contentLength() = bytes
+            override fun isOneShot() = true
+            override fun writeTo(sink: BufferedSink) = write(sink.outputStream())
         }
-        http.instanceFollowRedirects = false
-        http.connectTimeout = if (cleanup) 1500 else 7000
-        http.readTimeout = timeout
-        http.requestMethod = "POST"
-        http.doOutput = true
-        http.setRequestProperty("Connection", "close")
-        http.setRequestProperty("Content-Type", if (route == "/prepare-upload") "application/json" else "application/octet-stream")
-        http.setFixedLengthStreamingMode(bytes)
+        val request = Request.Builder().url("https://$endpoint$LAN_API$route")
+            .header("Connection", "close").post(body).build()
+        val http = client.newBuilder().readTimeout(timeout.toLong(), TimeUnit.MILLISECONDS).apply {
+            if (cleanup) {
+                connectTimeout(1500, TimeUnit.MILLISECONDS)
+                callTimeout(2, TimeUnit.SECONDS)
+            }
+        }.build().newCall(request)
         if (!cleanup) connection.set(http)
         try {
             if (!cleanup) check()
-            http.outputStream.use(write)
-            val status = http.responseCode
-            if (status != 200) throw IOException(when (status) {
-                403 -> "接收端已拒绝或请求已过期"
-                409 -> "接收端正在处理其他传输"
-                422 -> "接收端校验失败"
-                503 -> "接收端存储空间不足"
-                else -> "接收端返回错误 $status"
-            })
-            val content = http.inputStream.use { readJson(it, null) }
-            return if (content.isEmpty()) JSONObject() else JSONObject(content)
+            return http.execute().use { result ->
+                if (result.code != 200) throw IOException(when (result.code) {
+                    403 -> "接收端已拒绝或请求已过期"
+                    409 -> "接收端正在处理其他传输"
+                    422 -> "接收端校验失败"
+                    503 -> "接收端存储空间不足"
+                    else -> "接收端返回错误 ${result.code}"
+                })
+                val content = result.body?.byteStream()?.let { readJson(it, null) }.orEmpty()
+                if (content.isEmpty()) JSONObject() else JSONObject(content)
+            }
         } finally {
             connection.compareAndSet(http, null)
-            http.disconnect()
+        }
+    }
+}
+
+private class LanSocketFactory(private val route: LanSubnet) : SocketFactory() {
+    override fun createSocket(): Socket {
+        val socket = route.network?.socketFactory?.createSocket() ?: Socket()
+        try {
+            socket.bind(InetSocketAddress(route.address, 0))
+            if (route.link == LanLink.WIRED) socket.sendBufferSize = WIRED_SOCKET_BUFFER
+            return socket
+        } catch (e: IOException) {
+            socket.close()
+            throw e
+        }
+    }
+
+    // OkHttp uses the unconnected socket above so its connect timeout and cancellation apply.
+    override fun createSocket(host: String, port: Int): Socket = connect(InetSocketAddress(host, port))
+    override fun createSocket(host: InetAddress, port: Int): Socket = connect(InetSocketAddress(host, port))
+    override fun createSocket(host: String, port: Int, local: InetAddress, localPort: Int): Socket =
+        connect(InetSocketAddress(host, port), local, localPort)
+    override fun createSocket(host: InetAddress, port: Int, local: InetAddress, localPort: Int): Socket =
+        connect(InetSocketAddress(host, port), local, localPort)
+
+    private fun connect(remote: InetSocketAddress, local: InetAddress = route.address, localPort: Int = 0): Socket {
+        require(local == route.address && localPort == 0)
+        val socket = createSocket()
+        try {
+            socket.connect(remote)
+            return socket
+        } catch (e: IOException) {
+            socket.close()
+            throw e
         }
     }
 }

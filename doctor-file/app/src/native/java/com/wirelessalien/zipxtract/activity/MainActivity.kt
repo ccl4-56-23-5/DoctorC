@@ -504,8 +504,8 @@ class MainActivity:FileActionActivity(){
     private fun renderDock(){
         if(!::searchDock.isInitialized)return
         val t=dockStrength.coerceIn(0f,1f)
-        glass.applySurface(dock,t,LiquidGlassStyle.COMMENT_GROUP)
-        glass.applySurface(searchDock,style=LiquidGlassStyle.COMMENT_BUTTON)
+        glass.applySurface(dock,t,LiquidGlassStyle.HAZE_DOCK)
+        glass.applySurface(searchDock,style=LiquidGlassStyle.HAZE_DOCK)
         // Only the background lens swells. Dock bounds, icon/text layout and touch targets stay fixed.
         dock.scaleX=1f;dock.scaleY=1f;dockSelector.scaleX=1f+.06f*t;dockSelector.scaleY=1f+.16f*t
         if(dockSelector.visibility==View.VISIBLE){
@@ -1219,29 +1219,52 @@ class MainActivity:FileActionActivity(){
         trailing.accessible(description)
         trailing.imageAlpha=if(chosen)255 else if(selectionCount()>0)77 else 170
     }
-    private fun emptyView(item:Item):View=LinearLayout(this).apply{orientation=LinearLayout.VERTICAL;setPadding(dp(24),dp(28),dp(24),dp(36));addView(label(item.title,16f,colors.secondary),LinearLayout.LayoutParams(-1,-2));if(item.subtitle.isNotEmpty())addView(label(item.subtitle,13f,colors.secondary),LinearLayout.LayoutParams(-1,-2).apply{topMargin=dp(10)})}
+    private fun emptyView(item: Item): View = emptyState(item.title, item.subtitle, item.icon)
     private fun showSort(){menu("排序",listOf("名称","日期","大小",if(prefs.getBoolean("descending",false))"切换为升序"else"切换为降序"),listOf("name","date","size").indexOf(prefs.getString("sort","name"))){i->if(i<3)prefs.edit().putString("sort",listOf("name","date","size")[i]).apply()else prefs.edit().putBoolean("descending",!prefs.getBoolean("descending",false)).apply();loadPage()}}
-    private fun homeActions():View{
-        val row=LinearLayout(this).apply{setPadding(dp(8),dp(2),dp(8),dp(10))}
-        for((index,name)in listOf("新建压缩","解压文件").withIndex()){
-            val card=LinearLayout(this).apply{gravity=Gravity.CENTER_VERTICAL;setPadding(dp(14),0,dp(10),0);background=colors.background(colors.page,dp(27).toFloat());setOnClickListener{if(index==0){sourcePicker=true;openDirectory(directory)}else openCategory("压缩包")};if(index==0)id=R.id.create_archive}
-            val icon=ImageView(this).apply{setImageDrawable(Art.drawable(context,if(index==0)"archive"else"extract"))}
-            card.addView(icon,LinearLayout.LayoutParams(dp(40),dp(40)));card.addView(label(name,16f).apply{maxLines=1;ellipsize=TextUtils.TruncateAt.END},LinearLayout.LayoutParams(0,-2,1f).apply{leftMargin=dp(8)})
-            row.addView(card,LinearLayout.LayoutParams(0,dp(66),1f).apply{setMargins(dp(6),0,dp(6),0)})
-        };return row
+    private fun homeActions(): View = LinearLayout(this).apply {
+        setPadding(dp(8), dp(2), dp(8), dp(10))
+        addView(homeCard("新建压缩", "archive", emphasized = true) {
+            sourcePicker = true
+            openDirectory(directory)
+        }.apply { id = R.id.create_archive }, homeCardParams())
+        addView(homeCard("解压文件", "extract") { openCategory("压缩包") }, homeCardParams())
     }
-    private fun categories():View{
-        val grid=LinearLayout(this).apply{orientation=LinearLayout.VERTICAL;setPadding(dp(8),0,dp(8),dp(14))}
-        val names=listOf("文档","图片","视频","音乐","压缩包","安装包")
-        val hues=listOf(0xffffba1c.toInt(),0xff8064f4.toInt(),0xff8064f4.toInt(),0xfffa403c.toInt(),0xff3986f9.toInt(),0xff27c83c.toInt())
-        val icons=listOf("file","image","video","music","archive","apk")
-        for(pair in 0..2){val row=LinearLayout(this);for(i in pair*2..pair*2+1){val name=names[i]
-            val card=LinearLayout(this).apply{gravity=Gravity.CENTER_VERTICAL;setPadding(dp(16),0,dp(12),0);background=colors.background(colors.page,dp(27).toFloat());setOnClickListener{openCategory(name)}}
-            val image=ImageView(this).apply{setImageDrawable(Art.drawable(context,icons[i]))}
-            card.addView(image,LinearLayout.LayoutParams(dp(40),dp(40)));card.addView(label(name,18f),LinearLayout.LayoutParams(0,dp(64),1f).apply{leftMargin=dp(10)})
-            row.addView(card,LinearLayout.LayoutParams(0,dp(66),1f).apply{setMargins(dp(6),dp(5),dp(6),dp(5))})
-        };grid.addView(row)};return grid
+
+    private fun categories(): View = LinearLayout(this).apply {
+        orientation = LinearLayout.VERTICAL
+        setPadding(dp(8), 0, dp(8), dp(14))
+        listOf("文档" to "file", "图片" to "image", "视频" to "video",
+            "音乐" to "music", "压缩包" to "archive", "安装包" to "apk"
+        ).chunked(2).forEach { pair ->
+            addView(LinearLayout(this@MainActivity).apply {
+                pair.forEach { (name, icon) ->
+                    addView(homeCard(name, icon) { openCategory(name) }, homeCardParams())
+                }
+            })
+        }
     }
+
+    private fun homeCardParams() = LinearLayout.LayoutParams(0, -2, 1f).apply {
+        setMargins(dp(5), dp(4), dp(5), dp(4))
+    }
+
+    private fun homeCard(name: String, icon: String, emphasized: Boolean = false, open: () -> Unit): View =
+        LinearLayout(this).apply {
+            gravity = Gravity.CENTER_VERTICAL
+            minimumHeight = dp(64)
+            setPadding(dp(12), dp(10), dp(10), dp(10))
+            background = colors.pressable(if (emphasized) colors.selected else colors.surface, dp(18).toFloat())
+            isFocusable = true
+            setOnClickListener { open() }
+            addView(ImageView(context).apply {
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                setImageDrawable(Art.drawable(context, icon))
+            }, LinearLayout.LayoutParams(dp(36), dp(36)))
+            addView(label(name, 15f, colors.text, true).apply {
+                maxLines = 2
+                ellipsize = TextUtils.TruncateAt.END
+            }, LinearLayout.LayoutParams(0, -2, 1f).apply { marginStart = dp(9) })
+        }
     private fun rowView(item:Item):View{
         val outer=LinearLayout(this).apply{id=R.id.file_row;orientation=LinearLayout.HORIZONTAL;gravity=Gravity.CENTER_VERTICAL;setPadding(dp(20),dp(18),dp(12),dp(18));minimumHeight=dp(96)}
         val chosen=item.file?.path?.let{selected.contains(it)}?:item.entry?.let{selectedEntries.contains(it)}?:false

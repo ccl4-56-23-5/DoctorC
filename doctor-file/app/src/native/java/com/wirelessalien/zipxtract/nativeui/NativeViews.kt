@@ -5,6 +5,8 @@ import android.content.Context
 import android.graphics.*
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.RippleDrawable
+import android.content.res.ColorStateList
 import android.view.*
 import android.widget.*
 import android.text.TextUtils
@@ -15,13 +17,18 @@ fun Context.dp(value:Int):Int=dp(value.toFloat())
 class Palette(context:Context){
     val dark=(context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK)==Configuration.UI_MODE_NIGHT_YES
     val page=if(dark)Color.rgb(20,21,24)else Color.WHITE
-    val surface=if(dark)Color.rgb(34,36,41)else Color.rgb(245,245,245)
+    val surface=if(dark)0xff222632.toInt() else 0xfff2f5fa.toInt()
     val text=if(dark)Color.rgb(245,245,247)else Color.rgb(22,23,27)
-    val secondary=if(dark)Color.rgb(164,167,176)else Color.rgb(153,153,153)
-    val blue=Color.rgb(52,120,246)
-    val selected=if(dark)Color.rgb(35,53,87)else Color.rgb(243,243,243)
-    val line=if(dark)Color.rgb(54,57,65)else Color.rgb(237,238,242)
+    val secondary=if(dark)0xffaeb8c9.toInt() else 0xff59677c.toInt()
+    val blue=if(dark)0xff9bbaff.toInt() else 0xff245bd6.toInt()
+    val onAccent=if(dark)0xff112249.toInt() else Color.WHITE
+    val selected=if(dark)0xff253856.toInt() else 0xffe8efff.toInt()
+    val line=if(dark)0xff394352.toInt() else 0xffe0e7f1.toInt()
     fun background(color:Int,radius:Float):GradientDrawable=GradientDrawable().apply{setColor(color);cornerRadius=radius}
+    fun pressable(color: Int, radius: Float) = RippleDrawable(
+        ColorStateList.valueOf(if (dark) 0x309bbaff else 0x24245bd6),
+        background(color, radius), background(Color.WHITE, radius)
+    )
 }
 fun Context.label(value:String,size:Float=16f,color:Int=Palette(this).text,bold:Boolean=false):TextView=TextView(this).apply {
     text=value;textSize=size;setTextColor(color);includeFontPadding=false
@@ -32,7 +39,8 @@ fun View.accessible(value:String){contentDescription=value;importantForAccessibi
 
 fun Context.iconButton(name:String,description:String,color:Int=Palette(this).text,click:()->Unit):ImageButton=ImageButton(this).apply {
     scaleType=ImageView.ScaleType.FIT_CENTER
-    setImageDrawable(Art.drawable(context,name));setPadding(dp(9),dp(9),dp(9),dp(9));background=null
+    setImageDrawable(Art.drawable(context,name));setPadding(dp(9),dp(9),dp(9),dp(9))
+    background = Palette(context).pressable(Color.TRANSPARENT, dp(24).toFloat())
     accessible(description);minimumWidth=dp(48);minimumHeight=dp(48);if(color==Palette(context).secondary)imageAlpha=170;setOnClickListener{menuAnchor();click()}
 }
 class NativeToggle(context:Context):CompoundButton(context){
@@ -41,7 +49,7 @@ class NativeToggle(context:Context):CompoundButton(context){
     override fun onDraw(c:Canvas){
         val d=resources.displayMetrics.density;val w=48*d;val h=29*d;val x=(width-w)/2;val y=(height-h)/2
         p.color=if(isChecked)Palette(context).blue else if(Palette(context).dark)0xff555963.toInt() else 0xffdfe1e7.toInt()
-        c.drawRoundRect(x,y,x+w,y+h,h/2,h/2,p);p.color=Color.WHITE
+        c.drawRoundRect(x,y,x+w,y+h,h/2,h/2,p);p.color=if(isChecked)Palette(context).onAccent else Color.WHITE
         c.drawCircle(x+(if(isChecked)w-h/2 else h/2),y+h/2,11.5f*d,p)
     }
     override fun setChecked(checked:Boolean){super.setChecked(checked);invalidate()}

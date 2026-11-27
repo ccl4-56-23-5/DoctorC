@@ -17,18 +17,23 @@ import com.wirelessalien.zipxtract.nativeui.dp
 import com.wirelessalien.zipxtract.nativeui.label
 import java.util.Locale
 
-internal fun lanDeviceButton(context: Context, device: LanDevice, click: () -> Unit): View = with(context) {
+internal fun lanDeviceButton(context: Context, device: LanDevice, link: LanLink, click: () -> Unit): View = with(context) {
     val palette = Palette(this)
-    val button = object : LinearLayout(this) {
+    val wired = link == LanLink.WIRED
+    val button = object : FrameLayout(this) {
         override fun getAccessibilityClassName(): CharSequence = "android.widget.Button"
     }.apply {
+        background = palette.pressable(palette.surface, dp(20).toFloat())
+        isFocusable = true
+        accessible(listOf(device.shape.label, device.brand, device.model, if (wired) "有线连接" else "无线连接")
+            .filter { it.isNotBlank() }.joinToString(" "))
+        setOnClickListener { click() }
+    }
+    val content = LinearLayout(this).apply {
         orientation = LinearLayout.VERTICAL
         gravity = Gravity.CENTER
-        setPadding(dp(8), dp(13), dp(8), dp(12))
-        background = palette.background(palette.surface, dp(22).toFloat())
-        isFocusable = true
-        accessible(listOf(device.shape.label, device.brand, device.model).filter { it.isNotBlank() }.joinToString(" "))
-        setOnClickListener { click() }
+        setPadding(dp(8), dp(14), dp(8), dp(14))
+        importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
     }
     val graphic = FrameLayout(this)
     graphic.addView(DeviceGlyph(this, device.shape, palette.text), FrameLayout.LayoutParams(dp(56), dp(54), Gravity.CENTER))
@@ -58,9 +63,20 @@ internal fun lanDeviceButton(context: Context, device: LanDevice, click: () -> U
         ellipsize = TextUtils.TruncateAt.END
     }
     listOf(graphic, model, type).forEach { it.importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS }
-    button.addView(graphic, LinearLayout.LayoutParams(dp(74), dp(62)))
-    button.addView(model, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(5) })
-    button.addView(type, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(3) })
+    content.addView(graphic, LinearLayout.LayoutParams(dp(74), dp(62)))
+    content.addView(model, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(5) })
+    content.addView(type, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(3) })
+    button.addView(content, FrameLayout.LayoutParams(-1, -2))
+    if (wired) button.addView(ImageView(this).apply {
+        setImageResource(R.drawable.ic_wired_link)
+        setColorFilter(palette.blue)
+        setPadding(dp(5), dp(5), dp(5), dp(5))
+        background = palette.background(palette.selected, dp(12).toFloat())
+        importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+    }, FrameLayout.LayoutParams(dp(26), dp(26), Gravity.TOP or Gravity.END).apply {
+        topMargin = dp(8)
+        marginEnd = dp(8)
+    })
     button
 }
 

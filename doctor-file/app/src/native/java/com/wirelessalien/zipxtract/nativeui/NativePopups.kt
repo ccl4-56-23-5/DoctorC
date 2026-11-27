@@ -39,7 +39,7 @@ class NativePopups(private val activity:Activity){
         if(c.isFinishing||c.isDestroyed||!parent.isAttachedToWindow)return
         val frame=Rect().also{parent.getWindowVisibleDisplayFrame(it)}
         if(frame.width()<=0||frame.height()<=0)frame.set(0,0,c.resources.displayMetrics.widthPixels,c.resources.displayMetrics.heightPixels)
-        val width=minOf(c.dp(224),(frame.width()-c.dp(24)).coerceAtLeast(1))
+        val width=minOf(c.dp(248),(frame.width()-c.dp(24)).coerceAtLeast(1))
         val source = Rect()
         val location = IntArray(2)
         val hasAnchor = anchor != null && anchor.getLocalVisibleRect(source)
@@ -67,11 +67,11 @@ class NativePopups(private val activity:Activity){
                 background=StateListDrawable().apply{
                     addState(intArrayOf(android.R.attr.state_pressed),colors.background(colors.selected,c.dp(18).toFloat()))
                     addState(intArrayOf(android.R.attr.state_focused),colors.background(colors.selected,c.dp(18).toFloat()))
-                    addState(intArrayOf(),colors.background(android.graphics.Color.TRANSPARENT,c.dp(18).toFloat()))
+                    addState(intArrayOf(),colors.background(if (i == checked) colors.selected else android.graphics.Color.TRANSPARENT,c.dp(14).toFloat()))
                 }
                 setPadding(c.dp(15),c.dp(13),c.dp(15),c.dp(13))
             }
-            val titleView = c.label(item.title, 18f, colors.text).apply {
+            val titleView = c.label(item.title, 16f, if (i == checked) colors.blue else colors.text, i == checked).apply {
                 maxLines = 2
                 ellipsize = TextUtils.TruncateAt.END
             }

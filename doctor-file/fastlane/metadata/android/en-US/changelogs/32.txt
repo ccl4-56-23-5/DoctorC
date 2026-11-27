@@ -1,0 +1,3 @@
+Updated the navigation glass, file cards, dialogs and transfer status.
+Wired endpoints appear alongside Wi-Fi targets when a compatible IP connection is available.
+Tapping a rename rule opens its editor and focuses the output field.

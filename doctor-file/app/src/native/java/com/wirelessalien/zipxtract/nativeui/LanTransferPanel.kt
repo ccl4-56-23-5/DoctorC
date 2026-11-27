@@ -37,11 +37,12 @@ internal class LanTransferPanel(
             ellipsize = TextUtils.TruncateAt.END
         }
         private val percent = context.label("", 13f, colors.text, true)
-        private val status = context.label("", 12f, colors.text).apply {
+        private val status = context.label("", 12f, colors.secondary).apply {
             ellipsize = TextUtils.TruncateAt.END
         }
         private val progressBar = ProgressBar(context, null, android.R.attr.progressBarStyleHorizontal).apply {
             max = 100
+            progressBackgroundTintList = ColorStateList.valueOf(colors.line)
             progressTintList = ColorStateList.valueOf(colors.blue)
             indeterminateTintList = ColorStateList.valueOf(colors.blue)
             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
@@ -56,7 +57,7 @@ internal class LanTransferPanel(
             gravity = Gravity.CENTER_VERTICAL
             val content = LinearLayout(context).apply {
                 orientation = VERTICAL
-                background = colors.background(colors.selected, context.dp(18).toFloat())
+                background = colors.background(colors.surface, context.dp(18).toFloat())
                 setPadding(context.dp(14), context.dp(7), context.dp(6), context.dp(7))
             }
             val row = LinearLayout(context).apply { gravity = Gravity.CENTER_VERTICAL }
@@ -65,7 +66,7 @@ internal class LanTransferPanel(
             heading.addView(title, LayoutParams(0, -2, 1f))
             heading.addView(percent, LayoutParams(-2, -2).apply { marginStart = context.dp(8) })
             texts.addView(heading, LayoutParams(-1, -2))
-            texts.addView(status, LayoutParams(-1, -2))
+            texts.addView(status, LayoutParams(-1, -2).apply { topMargin = context.dp(4) })
             row.addView(texts, LayoutParams(0, -2, 1f))
             row.addView(action, LayoutParams(context.dp(48), context.dp(48)).apply { marginStart = context.dp(4) })
             content.addView(row, LayoutParams(-1, -2))

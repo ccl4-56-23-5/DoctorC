@@ -22,7 +22,8 @@ import kotlin.math.roundToInt
  * legacy compatibility path, with one overlay tint and a fine rim. Foreground labels remain clear.
  */
 class GlassMaterial(context:Context) {
-    private val dark=Palette(context).dark
+    private val palette=Palette(context)
+    private val dark=palette.dark
     private val density=context.resources.displayMetrics.density
     private val edgeWidth=(density*.65f).roundToInt().coerceAtLeast(1)
     private val surfaces=WeakHashMap<BlurView,SurfaceState>()
@@ -56,16 +57,16 @@ class GlassMaterial(context:Context) {
     /** Public for source-level invariants and callers that need to coordinate material. */
     fun profile(strength:Float,compact:Boolean=false):Profile=profiles[if(compact)1 else 0][step(strength)]
 
-    private val commentCompatibility = Profile(
-        blurRadius=8f,
-        overlayColor=if(dark)Color.argb(71,0,0,0) else Color.argb(153,255,255,255),
-        rimColor=Color.argb(if(dark)56 else 97,255,255,255),
+    private val hazeCompatibility = Profile(
+        blurRadius=16f,
+        overlayColor=androidx.core.graphics.ColorUtils.setAlphaComponent(palette.surface, 51),
+        rimColor=Color.argb(if(dark)83 else 115,255,255,255),
         elevationDp=2f,
         outlineAlpha=if(dark).18f else .25f
     )
 
     internal fun applySurface(view:BlurView,strength:Float=0f,style:LiquidGlassStyle=LiquidGlassStyle.DEFAULT) {
-        val material=if(style==LiquidGlassStyle.DEFAULT)profile(strength) else commentCompatibility
+        val material=if(style==LiquidGlassStyle.DEFAULT)profile(strength) else hazeCompatibility
         if(view is LiquidGlassView)view.setGlassMaterial(strength,dark,style)
         val optical=view is LiquidGlassView&&Build.VERSION.SDK_INT>=33
         val opticalShadow=optical&&style!=LiquidGlassStyle.DEFAULT

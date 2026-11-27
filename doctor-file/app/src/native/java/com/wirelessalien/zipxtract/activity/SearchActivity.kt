@@ -374,9 +374,9 @@ class SearchActivity : FileActionActivity() {
         addAction("rename", "重命名") { renameFiles(selected.map(::File), it) }
         addAction("transfer", "传输") { showLanSend(selected.map(::File)) }
         addAction("more", "更多") { showSelectionMenu() }
-        glass.applySurface(this, style = LiquidGlassStyle.COMMENT_GROUP)
+        glass.applySurface(this, style = LiquidGlassStyle.HAZE_DOCK)
         addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
-            glass.applySurface(this, style = LiquidGlassStyle.COMMENT_GROUP)
+            glass.applySurface(this, style = LiquidGlassStyle.HAZE_DOCK)
         }
     }
 

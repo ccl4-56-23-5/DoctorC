@@ -337,6 +337,32 @@ class Ui112RenamerTest {
         assertEquals("新方案",store.list().single().name)
     }
 
+    @Test fun shortTapOnRuleSelectsReplacementText() {
+        val file = File(folder, "old-title.txt").apply { writeText("fixture") }
+        val store = RenamePresetStore(context)
+        store.remember(RenamePresetStore.LastUsed(
+            listOf(Rule(Kind.REPLACE, mode = "all", text = "old", replacement = "new")),
+            RenameFileOrder.Settings()
+        ))
+        open(listOf(file), "1 项将改名")
+        click("batch_rename_rule_0")
+        await("replacement focused") {
+            all().filterIsInstance<EditText>().any {
+                it.tag == "batch_rename_rule_replacement" && it.hasFocus()
+            }
+        }
+        main {
+            val field = tagged("batch_rename_rule_replacement") as EditText
+            assertEquals(0, field.selectionStart)
+            assertEquals(field.length(), field.selectionEnd)
+            field.setText("final")
+        }
+        click("batch_rename_rule_save")
+        await("replacement preview updates") {
+            (tagged("batch_rename_after_0") as TextView).text.toString() == "新：final-title.txt"
+        }
+    }
+
     @Test fun mainPanelClosesBackToItsActualSourceEvenWhenInterrupted() {
         val file=File(folder,"a.txt").apply { writeText("a") }
         scenario=ActivityScenario.launch(MainActivity::class.java)
