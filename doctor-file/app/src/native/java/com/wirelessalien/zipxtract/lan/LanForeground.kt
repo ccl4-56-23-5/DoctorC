@@ -70,7 +70,11 @@ internal class LanForeground(private val context: Context) {
     val sending = _sending.asStateFlow()
     private val _receiving = MutableStateFlow<LanTask?>(null)
     val receiving = _receiving.asStateFlow()
-    private var sender: LanSender? = null
+    private data class Sender(val send: ((LanProgress) -> Unit) -> LanBatchResult, val cancel: () -> Unit)
+    private var sender: Sender? = null
+    private val usb = UsbCable(context, scope, { postOffer(null, it) },
+        { id, progress -> updateProgress(_receiving, id, progress) }, ::finishReceive, ::schedule)
+    val usbStatus get() = usb.status
     private var visible = 0
     private var device: LanDevice? = null
     private var networkWatched = false
@@ -84,9 +88,10 @@ internal class LanForeground(private val context: Context) {
     private var receivingRoute: LanSubnet? = null
     private val refreshPoll = Runnable { schedule() }
     private val refresh = Runnable { scope.launch {
+        usb.reconcile(device, visible > 0, _sending.value?.active == true || _receiving.value?.active == true)
         reconcile()
         main.removeCallbacks(refreshPoll)
-        if (needsListener()) main.postDelayed(refreshPoll, 1800)
+        if (needsListener() || _sending.value?.active == true) main.postDelayed(refreshPoll, 1000)
     } }
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         override fun onCapabilitiesChanged(network: Network, capabilities: NetworkCapabilities) = schedule()
@@ -130,21 +135,37 @@ internal class LanForeground(private val context: Context) {
 
     suspend fun ownFingerprint(): String = withContext(Dispatchers.IO) { LanTls.receiver().fingerprint }
 
-    fun send(files: List<File>, peer: LanPeer, onRelease: (() -> Unit)? = null): Boolean {
+    fun send(files: List<File>, peer: LanPeer, onRelease: (() -> Unit)? = null): Boolean =
+        sendTask(peer.device, onRelease) {
+            if (peer.route !in lanSubnets(context)) throw IOException("所选连接已断开，请重新选择设备")
+            val client = LanSender(peer.endpoint, peer.fingerprint, peer.route, peer.supportsTree)
+            Sender({ progress -> client.send(files, Build.MODEL, progress) }, client::cancel)
+        }
+
+    fun send(files: List<File>, peer: UsbPeer, onRelease: (() -> Unit)? = null): Boolean =
+        sendTask(peer.device, onRelease, usbLink = true) {
+            if (usb.status.value.peer !== peer) throw IOException("USB 连接已断开，请重新选择设备")
+            Sender({ progress -> peer.session.send(files, progress) }, { peer.session.cancelSend() })
+        }
+
+    private fun sendTask(
+        peer: LanDevice,
+        onRelease: (() -> Unit)?,
+        usbLink: Boolean = false,
+        prepare: () -> Sender
+    ): Boolean {
         if (_sending.value?.active == true) return false
-        val task = LanTask(UUID.randomUUID().toString(), "发送到 ${peer.device.model}", LanProgress("正在连接…"))
+        val title = if (usbLink) "USB 发送到 ${peer.model}" else "发送到 ${peer.model}"
+        val task = LanTask(UUID.randomUUID().toString(), title, LanProgress("正在连接…"))
         _sending.value = task
         scope.launch {
             val result = try {
-                val client = withContext(Dispatchers.IO) {
-                    if (peer.route !in lanSubnets(context)) throw IOException("所选连接已断开，请重新选择设备")
-                    LanSender(peer.endpoint, peer.fingerprint, peer.route, peer.supportsTree)
-                }
+                val client = withContext(Dispatchers.IO) { prepare() }
                 if (_sending.value?.cancelling == true) LanBatchResult(error = "发送已取消")
                 else {
                     sender = client
                     withContext(Dispatchers.IO) {
-                        client.send(files, Build.MODEL) { updateProgress(_sending, task.id, it) }
+                        client.send { updateProgress(_sending, task.id, it) }
                     }
                 }
             } catch (e: CancellationException) {
@@ -156,6 +177,7 @@ internal class LanForeground(private val context: Context) {
                 release(onRelease)
             }
             _sending.update { if (it?.id == task.id) it.finish(result) else it }
+            schedule()
         }
         return true
     }
@@ -232,35 +254,43 @@ internal class LanForeground(private val context: Context) {
         }
     }
 
+    private fun postOffer(route: LanSubnet?, offer: LanReceiver.Offer) {
+        scope.launch {
+            if ((route != null && route !in listeners) || visible == 0 || !storageAllowed() || offer.decision.isDone ||
+                _pending.value?.decision?.isDone == false || _receiving.value?.active == true) {
+                offer.decision.complete(null)
+                return@launch
+            }
+            pendingRoute = route
+            _pending.value = offer
+            offer.decision.whenComplete { _, _ -> scope.launch {
+                if (_pending.value === offer) {
+                    _pending.value = null
+                    pendingRoute = null
+                }
+            } }
+        }
+    }
+
+    private fun finishReceive(id: String, result: LanBatchResult) {
+        scope.launch {
+            if (result.files > 0 || result.folders > 0) EventBus.emit(AppEvent.LanFilesReceived)
+            if (_receiving.value?.id == id) {
+                receivingRoute = null
+                _receiving.update { if (it?.id == id && it.active) it.finish(result) else it }
+                watchNetwork()
+                schedule()
+            }
+        }
+    }
+
     private suspend fun startListener(route: LanSubnet): Listener? = withContext(Dispatchers.IO) {
         runCatching {
             val identity = LanTls.receiver()
             val receiver = LanReceiver(route, identity,
-                onOffer = { offer -> scope.launch {
-                    if (route !in listeners || visible == 0 || offer.decision.isDone ||
-                        _pending.value?.decision?.isDone == false || _receiving.value?.active == true) {
-                        offer.decision.complete(null)
-                    } else {
-                        pendingRoute = route
-                        _pending.value = offer
-                        offer.decision.whenComplete { _, _ -> scope.launch {
-                            if (_pending.value === offer) {
-                                _pending.value = null
-                                pendingRoute = null
-                            }
-                        } }
-                    }
-                } },
+                onOffer = { postOffer(route, it) },
                 onProgress = { id, progress -> updateProgress(_receiving, id, progress) },
-                onResult = { id, result -> scope.launch {
-                    if (result.files > 0 || result.folders > 0) EventBus.emit(AppEvent.LanFilesReceived)
-                    if (_receiving.value?.id == id) {
-                        receivingRoute = null
-                        _receiving.update { if (it?.id == id && it.active) it.finish(result) else it }
-                        watchNetwork()
-                        schedule()
-                    }
-                } }
+                onResult = ::finishReceive
             )
             try {
                 receiver.start(20_000)

@@ -17,7 +17,7 @@ import com.wirelessalien.zipxtract.nativeui.dp
 import com.wirelessalien.zipxtract.nativeui.label
 import java.util.Locale
 
-internal fun lanDeviceButton(context: Context, device: LanDevice, link: LanLink, click: () -> Unit): View = with(context) {
+internal fun lanDeviceButton(context: Context, device: LanDevice, link: LanLink, directUsb: Boolean = false, click: () -> Unit): View = with(context) {
     val palette = Palette(this)
     val wired = link == LanLink.WIRED
     val button = object : FrameLayout(this) {
@@ -25,7 +25,7 @@ internal fun lanDeviceButton(context: Context, device: LanDevice, link: LanLink,
     }.apply {
         background = palette.pressable(palette.surface, dp(20).toFloat())
         isFocusable = true
-        accessible(listOf(device.shape.label, device.brand, device.model, if (wired) "有线连接" else "无线连接")
+        accessible(listOf(device.shape.label, device.brand, device.model, if (directUsb) "USB 有线" else if (wired) "有线连接" else "无线连接")
             .filter { it.isNotBlank() }.joinToString(" "))
         setOnClickListener { click() }
     }

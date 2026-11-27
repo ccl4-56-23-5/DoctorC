@@ -60,14 +60,14 @@ class GlassMaterial(context:Context) {
     private val hazeCompatibility = Profile(
         blurRadius=16f,
         overlayColor=androidx.core.graphics.ColorUtils.setAlphaComponent(palette.surface, 51),
-        rimColor=Color.argb(if(dark)83 else 115,255,255,255),
-        elevationDp=2f,
-        outlineAlpha=if(dark).18f else .25f
+        rimColor=if(dark)0x8ddeecff.toInt() else 0x6a526b8c,
+        elevationDp=3f,
+        outlineAlpha=if(dark).33f else .36f
     )
 
     internal fun applySurface(view:BlurView,strength:Float=0f,style:LiquidGlassStyle=LiquidGlassStyle.DEFAULT) {
         val material=if(style==LiquidGlassStyle.DEFAULT)profile(strength) else hazeCompatibility
-        if(view is LiquidGlassView)view.setGlassMaterial(strength,dark,style)
+        if(view is LiquidGlassView)view.setGlassMaterial(if(style==LiquidGlassStyle.DEFAULT)strength else 0f,dark,style)
         val optical=view is LiquidGlassView&&Build.VERSION.SDK_INT>=33
         val opticalShadow=optical&&style!=LiquidGlassStyle.DEFAULT
         val state=surfaces.getOrPut(view){
@@ -95,7 +95,7 @@ class GlassMaterial(context:Context) {
         // The shader draws its own rim. Keep the compatibility rim configured if the GPU path fails.
         val rimColor=if(optical&&!opticalShadow)Color.TRANSPARENT else material.rimColor
         if(state.rimColor!=rimColor){
-            state.rimColor=rimColor;state.rim.setStroke(edgeWidth,rimColor)
+            state.rimColor=rimColor;state.rim.setStroke(if(style==LiquidGlassStyle.HAZE_DOCK)(density*1.15f).roundToInt().coerceAtLeast(1) else edgeWidth,rimColor)
         }
         if(state.overlayColor!=material.overlayColor){state.overlayColor=material.overlayColor;view.setOverlayColor(material.overlayColor)}
         if(abs(state.blur-material.blurRadius)>.01f){state.blur=material.blurRadius;view.setBlurRadius(material.blurRadius)}

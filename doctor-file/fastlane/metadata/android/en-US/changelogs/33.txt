@@ -1,0 +1,2 @@
+Direct bidirectional USB transfer between Android devices using Android Open Accessory mode.
+The bottom navigation and search controls now use a fixed, stronger glass effect.

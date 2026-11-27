@@ -1,6 +1,6 @@
 # FileDoctorC
 
-FileDoctorC 是 Android 文件管理、压缩解压和设备互传工具。稳定版为 **1.1.5+30**，测试版为 **1.1.6+31**，支持 Android 7.0 及以上。签名 APK 支持覆盖安装相同应用 ID 和签名的版本。
+FileDoctorC 是 Android 文件管理、压缩解压和设备互传工具。稳定版为 **1.1.5+30**，测试版为 **1.1.7+32**，支持 Android 7.0 及以上。签名 APK 支持覆盖安装相同应用 ID 和签名的版本。
 
 ## 文件管理
 
@@ -17,10 +17,12 @@ FileDoctorC 是 Android 文件管理、压缩解压和设备互传工具。稳�
 
 ## 无线和有线互传
 
-1. 两端接入互相可达的 IPv4 局域网并打开 FileDoctorC。设备可走 Wi‑Fi、以太网或 Android 系统已建立的 USB 网络。
-2. 发送端长按选中一个或多个文件、文件夹，点「传输」，选择发现的设备。有线目标在同一列表中显示，右上角带有插头标记。
+1. 两台设备打开 FileDoctorC。Wi-Fi 和以太网使用可互通的 IPv4。两台 Android 手机通过数据线直连时，可从系统的「传输文件」模式开始，按系统提示授权 USB 设备和配件。
+2. 长按选中文件或文件夹，点「传输」后选择接收设备。USB 直连和有线网络均用原设备卡片右上角的插头区分。USB 直连需要两端使用 1.1.7+32 或以上。
 3. 接收端确认请求及保存目录。确认后两端仍可浏览和搜索，进度、取消入口和结果可从相应页面查看。
 4. 混合批次保留子目录和空文件夹，接收端逐文件核对 SHA-256，校验后发布文件并尝试恢复文件时间。遇到同名项目自动编号。发送和接收设备均需支持文件夹传输。
+
+直连协商会把另一端从系统 MTP 模式切换到 Android Open Accessory。恢复系统「传输文件」用途时可重新插线并在系统里选择该用途。
 
 ## 与 MookDoctorC 换机迁移
 
@@ -28,7 +30,7 @@ FileDoctorC 是 Android 文件管理、压缩解压和设备互传工具。稳�
 
 ## 安装、构建与许可
 
-从[测试版](https://github.com/ccl4-56-23-5/DoctorC/releases/tag/filedoctorc-v1.1.6%2B31)或[稳定版](https://github.com/ccl4-56-23-5/DoctorC/releases/tag/filedoctorc-v1.1.5%2B30)发布页获取签名 APK，安装前可与同页 SHA-256 校验表比对。源码使用 Android SDK Platform 37、Build Tools 37.0.0、NDK 28.2.13676358、CMake 3.22.1、JDK 21 和 Gradle Wrapper。工作区构建、签名与验证入口见维护文档。
+从[测试版](https://github.com/ccl4-56-23-5/DoctorC/releases/tag/filedoctorc-v1.1.7%2B32)或[稳定版](https://github.com/ccl4-56-23-5/DoctorC/releases/tag/filedoctorc-v1.1.5%2B30)发布页获取签名 APK，安装前可与同页 SHA-256 校验表比对。源码使用 Android SDK Platform 37、Build Tools 37.0.0、NDK 28.2.13676358、CMake 3.22.1、JDK 21 和 Gradle Wrapper。工作区构建、签名与验证入口见维护文档。
 
 FileDoctorC 是 ZipXtract 的非官方衍生项目，保留 GPL-3.0-or-later 和第三方声明。感谢 ZipXtract、Liquid-Glass-Android、Haze、7-Zip 及各第三方项目的贡献者。压缩组件的对应源码随仓库提供。
 

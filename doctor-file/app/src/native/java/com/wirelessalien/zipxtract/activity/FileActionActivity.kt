@@ -184,21 +184,32 @@ abstract class FileActionActivity : Activity() {
         var dismissed = false
         var chosen = false
         var pendingRelease = onRelease
-        fun render(peers: List<LanPeer>) {
+        var networkPeers = emptyList<LanPeer>()
+        var unavailable = false
+        data class Target(val device: LanDevice, val link: LanLink, val directUsb: Boolean, val send: () -> Boolean)
+        fun render() {
             if (dismissed || chosen) return
             content.removeAllViews()
+            val usb = lan.usbStatus.value
+            val peers = listOfNotNull(usb.peer?.let { peer ->
+                Target(peer.device, LanLink.WIRED, true) { lan.send(files, peer, pendingRelease) }
+            }) + networkPeers.map { peer ->
+                Target(peer.device, peer.route.link, false) { lan.send(files, peer, pendingRelease) }
+            }
             if (peers.isEmpty()) {
-                content.lanRow(emptyState("正在搜索接收设备", "让接收设备保持打开 FileDoctorC", "transfer"))
+                val title = if (unavailable && usb.hint == null) "暂时无法发现设备" else "正在搜索接收设备"
+                content.lanRow(emptyState(title, usb.hint ?: "让接收设备保持打开 FileDoctorC", "transfer"))
                 return
             }
+            usb.hint?.let { content.lanRow(label(it, 13f, colors.secondary)) }
             val columns = (minOf(resources.configuration.screenWidthDp, 860) / 154).coerceIn(1, 5)
             peers.chunked(columns).forEach { group ->
                 val row = LinearLayout(this)
                 group.forEach { peer ->
-                    val button = lanDeviceButton(this, peer.device, peer.route.link) {
+                    val button = lanDeviceButton(this, peer.device, peer.link, peer.directUsb) {
                         if (!chosen) {
                             chosen = true
-                            val started = lan.send(files, peer, pendingRelease)
+                            val started = peer.send()
                             if (started) pendingRelease = null
                             page.dialog.close { if (!started) notice("已有发送任务正在进行") }
                         }
@@ -211,9 +222,11 @@ abstract class FileActionActivity : Activity() {
                 content.lanRow(row)
             }
         }
-        render(emptyList())
+        render()
+        val usbUpdates = scope.launch { lan.usbStatus.collect { render() } }
         page.dialog.setOnDismissListener {
             dismissed = true
+            usbUpdates.cancel()
             discovery?.close()
             if (deviceChooser === page.dialog) deviceChooser = null
             lan.release(pendingRelease)
@@ -226,15 +239,13 @@ abstract class FileActionActivity : Activity() {
             try {
                 val own = lan.ownFingerprint()
                 if (!dismissed) discovery = LanDiscovery(this@FileActionActivity, own) { peers ->
-                    runOnUiThread { render(peers) }
+                    runOnUiThread { networkPeers = peers; render() }
                 }
             } catch (e: CancellationException) {
                 throw e
             } catch (_: Exception) {
-                if (!dismissed) {
-                    content.removeAllViews()
-                    content.lanRow(emptyState("暂时无法发现设备", "请检查 Wi‑Fi 或有线网络", "transfer"))
-                }
+                unavailable = true
+                render()
             }
         }
     }
