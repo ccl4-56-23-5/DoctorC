@@ -2,13 +2,11 @@
 package com.wirelessalien.zipxtract.nativeui
 
 import android.content.Context
-import android.graphics.BlendMode
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RenderEffect
 import android.graphics.RuntimeShader
-import android.graphics.Shader
 import androidx.annotation.RequiresApi
 import androidx.core.graphics.ColorUtils
 import com.wirelessalien.zipxtract.R
@@ -17,12 +15,9 @@ import com.wirelessalien.zipxtract.R
 internal class HazeDockMaterial(context: Context, private val density: Float) {
     private val palette = Palette(context)
     val containerColor = palette.surface
-    private val opticalSource = context.shaderSource(R.raw.haze_glass_optical)
-    private val body = RuntimeShader(opticalSource).apply { configureOptics(0f) }
-    private val sharpEdge = RuntimeShader(opticalSource).apply { configureOptics(10f * density) }
+    private val optic = RuntimeShader(context.shaderSource(R.raw.haze_glass_optical)).apply { configureOptics() }
     private val rim = RuntimeShader(context.shaderSource(R.raw.haze_glass_rim))
     private val rimPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { shader = rim }
-    private val blur = RenderEffect.createBlurEffect(BLUR_DP * density, BLUR_DP * density, Shader.TileMode.CLAMP)
 
     init {
         val dark = palette.dark
@@ -31,9 +26,8 @@ internal class HazeDockMaterial(context: Context, private val density: Float) {
         rim.setColorUniform("edgeShadow", if (dark) 0x73000000 else 0x58445874)
     }
 
-    private fun RuntimeShader.configureOptics(sharpWidth: Float) {
+    private fun RuntimeShader.configureOptics() {
         val dark = palette.dark
-        setFloatUniform("sharpEdgeWidth", sharpWidth)
         setFloatUniform("refractionStrength", .96f)
         setFloatUniform("refractionFoldStrength", 0f)
         setFloatUniform("refractionScale", 56f * density)
@@ -54,14 +48,14 @@ internal class HazeDockMaterial(context: Context, private val density: Float) {
         val w = width.toFloat()
         val h = height.toFloat()
         val edge = minOf(w, h) / 2f
-        for (optic in arrayOf(body, sharpEdge)) {
-            optic.setFloatUniform("sampleSize", w + 2 * padding, h + 2 * padding)
-            optic.setFloatUniform("materialOrigin", padding.toFloat(), padding.toFloat())
-            optic.setFloatUniform("materialSize", w, h)
-            optic.setFloatUniform("cornerRadii", edge, edge, edge, edge)
-            optic.setFloatUniform("sampleStep", 2f)
-            optic.setFloatUniform("edgeSoftness", density)
-            optic.setFloatUniform("refractionHeight", minOf(w, h) * .15f)
+        with(optic) {
+            setFloatUniform("sampleSize", w + 2 * padding, h + 2 * padding)
+            setFloatUniform("materialOrigin", padding.toFloat(), padding.toFloat())
+            setFloatUniform("materialSize", w, h)
+            setFloatUniform("cornerRadii", edge, edge, edge, edge)
+            setFloatUniform("sampleStep", 2f)
+            setFloatUniform("edgeSoftness", density)
+            setFloatUniform("refractionHeight", minOf(w, h) * .15f)
         }
 
         rim.setFloatUniform("materialOrigin", 0f, 0f)
@@ -71,12 +65,7 @@ internal class HazeDockMaterial(context: Context, private val density: Float) {
         rim.setFloatUniform("edgeSoftness", 2.3f * density)
         rim.setFloatUniform("lightPosition", w * .38f, h * .46f)
 
-        // Diffuse the panel's interior while keeping a narrow band of sharp background
-        // displacement. Both stages sample the same backdrop with the same 20% tint.
-        val softened = RenderEffect.createChainEffect(
-            RenderEffect.createRuntimeShaderEffect(body, "content"), blur)
-        val refracted = RenderEffect.createRuntimeShaderEffect(sharpEdge, "content")
-        return RenderEffect.createBlendModeEffect(softened, refracted, BlendMode.SRC_OVER)
+        return RenderEffect.createRuntimeShaderEffect(optic, "content")
     }
 
     fun drawRim(canvas: Canvas, width: Int, height: Int) {
@@ -86,7 +75,6 @@ internal class HazeDockMaterial(context: Context, private val density: Float) {
     private fun Context.shaderSource(id: Int) = resources.openRawResource(id).bufferedReader().use { it.readText() }
 
     companion object {
-        private const val BLUR_DP = 16f
         private const val TINT_ALPHA = 51 // 20% of 255
     }
 }

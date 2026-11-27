@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import android.os.Build
@@ -151,7 +152,7 @@ internal class LanAdvertisement(private val nsd: NsdManager, endpoint: LanEndpoi
 @Suppress("DEPRECATION")
 internal class LanDiscovery(private val context: Context, private val ownFingerprint: String?,
                             private val changed: (List<LanPeer>) -> Unit) : AutoCloseable {
-    private data class ServiceKey(val name: String, val network: Network?)
+    private data class ServiceKey(val name: String, val network: Network?, val wifiOnly: Boolean)
     private data class Service(val endpoint: LanEndpoint, val fingerprint: String, val device: LanDevice,
                                val supportsTree: Boolean, val link: LanLink?, val network: Network?)
 
@@ -173,14 +174,16 @@ internal class LanDiscovery(private val context: Context, private val ownFingerp
     }
     private var resolving = false
     private var closed = false
-    private val listener = object : NsdManager.DiscoveryListener {
+    private fun discoveryListener(wifiOnly: Boolean) = object : NsdManager.DiscoveryListener {
         override fun onDiscoveryStarted(type: String) = Unit
         override fun onDiscoveryStopped(type: String) = Unit
-        override fun onStartDiscoveryFailed(type: String, code: Int) { close() }
+        override fun onStartDiscoveryFailed(type: String, code: Int) {
+            if (!wifiOnly && Build.VERSION.SDK_INT < 33) close()
+        }
         override fun onStopDiscoveryFailed(type: String, code: Int) = Unit
         override fun onServiceFound(info: NsdServiceInfo) {
             synchronized(lock) {
-                val key = info.key()
+                val key = info.key(wifiOnly)
                 if (closed || offered.size >= 64 || offered.putIfAbsent(key, info) != null) return
                 waiting.add(key)
                 resolveNext()
@@ -188,7 +191,7 @@ internal class LanDiscovery(private val context: Context, private val ownFingerp
         }
         override fun onServiceLost(info: NsdServiceInfo) {
             synchronized(lock) {
-                val key = info.key()
+                val key = info.key(wifiOnly)
                 offered.remove(key)
                 waiting.remove(key)
                 if (resolved.remove(key) != null) publish()
@@ -196,14 +199,23 @@ internal class LanDiscovery(private val context: Context, private val ownFingerp
         }
     }
 
+    private val listener = discoveryListener(wifiOnly = false)
+    private val wifiListener = discoveryListener(wifiOnly = true)
+
     init {
         nsd.discoverServices(LAN_SERVICE, NsdManager.PROTOCOL_DNS_SD, listener)
+        if (Build.VERSION.SDK_INT >= 33) {
+            val wifi = NetworkRequest.Builder().addTransportType(NetworkCapabilities.TRANSPORT_WIFI).build()
+            // Discover Wi-Fi even when the system selected an Ethernet network as default.
+            runCatching { nsd.discoverServices(LAN_SERVICE, NsdManager.PROTOCOL_DNS_SD, wifi,
+                context.mainExecutor, wifiListener) }
+        }
         main.post(refresh)
     }
 
     private fun NsdServiceInfo.networkOrNull() = if (Build.VERSION.SDK_INT >= 33) network else null
 
-    private fun NsdServiceInfo.key() = ServiceKey(serviceName, networkOrNull())
+    private fun NsdServiceInfo.key(wifiOnly: Boolean) = ServiceKey(serviceName, networkOrNull(), wifiOnly)
 
     private fun publish() {
         val subnets = lanSubnets(context)
@@ -276,6 +288,7 @@ internal class LanDiscovery(private val context: Context, private val ownFingerp
             main.removeCallbacks(refresh)
         }
         runCatching { nsd.stopServiceDiscovery(listener) }
+        if (Build.VERSION.SDK_INT >= 33) runCatching { nsd.stopServiceDiscovery(wifiListener) }
     }
 }
 

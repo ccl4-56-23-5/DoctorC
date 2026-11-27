@@ -56,7 +56,8 @@ internal fun lanDeviceButton(context: Context, device: LanDevice, link: LanLink,
         maxLines = 1
         ellipsize = TextUtils.TruncateAt.END
     }
-    val type = label(listOf(device.shape.label, device.brand).filter { it.isNotBlank() }.joinToString(" · "),
+    val transport = if (directUsb) "USB 有线" else if (wired) "有线网络" else "无线"
+    val type = label("${device.shape.label} · $transport",
         12f, palette.secondary).apply {
         gravity = Gravity.CENTER
         maxLines = 1
@@ -67,8 +68,8 @@ internal fun lanDeviceButton(context: Context, device: LanDevice, link: LanLink,
     content.addView(model, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(5) })
     content.addView(type, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(3) })
     button.addView(content, FrameLayout.LayoutParams(-1, -2))
-    if (wired) button.addView(ImageView(this).apply {
-        setImageResource(R.drawable.ic_wired_link)
+    button.addView(ImageView(this).apply {
+        setImageResource(if (wired) R.drawable.ic_wired_link else R.drawable.ic_wireless_link)
         setColorFilter(palette.blue)
         setPadding(dp(5), dp(5), dp(5), dp(5))
         background = palette.background(palette.selected, dp(12).toFloat())

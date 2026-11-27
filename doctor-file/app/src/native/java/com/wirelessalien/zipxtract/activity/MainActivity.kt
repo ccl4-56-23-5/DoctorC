@@ -900,12 +900,19 @@ class MainActivity:FileActionActivity(){
                 return@launch
             }
             val handoff=FileHandoff(this@MainActivity)
-            val outgoing=withContext(Dispatchers.IO){handoff.viewIntent(f)}
+            val mime = fileMimeType(f)
+            if (previewKind(mime) != null) {
+                val files = listItems.mapNotNull { item -> item.file?.takeUnless { item.directory } }
+                startActivity(MediaPreviewIntent.create(this@MainActivity, f, files))
+                return@launch
+            }
+            val outgoing=withContext(Dispatchers.IO){handoff.viewIntent(f, preferMediaStore = mime != APK_MIME)}
             try{startActivity(outgoing)}catch(_:SecurityException){
                 // Some MediaStore readers can read but cannot re-grant a URI. Keep the safe provider path.
                 startActivity(withContext(Dispatchers.IO){handoff.viewIntent(f,preferMediaStore=false)})
             }
-        }catch(_:Exception){notice("没有找到可打开此文件的应用")}
+        }catch(e:CancellationException){throw e}
+        catch(_:Exception){notice(if(fileMimeType(f)==APK_MIME) "无法打开系统安装器，请检查 APK 与安装权限" else "没有找到可打开此文件的应用")}
     }}
     private fun openArchive(file:File,password:String?=null){
         if(ActiveOperation.busy()){notice("请等待当前任务完成");return}

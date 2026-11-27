@@ -14,6 +14,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.File
+import java.io.FilterOutputStream
 import java.net.InetAddress
 import java.net.ServerSocket
 import java.net.Socket
@@ -65,6 +66,40 @@ class UsbTransferDeviceTest {
         }
     }
 
+    @Test fun receiverCanCancelPayloadAndSendAgainOnTheSameCable() {
+        val dataInFlight = CountDownLatch(1)
+        val continueWriting = CountDownLatch(1)
+        val holdOnce = AtomicBoolean(true)
+        linked(onHostChunk = {
+            if (holdOnce.compareAndSet(true, false)) {
+                dataInFlight.countDown()
+                check(continueWriting.await(5, TimeUnit.SECONDS))
+            }
+        }) { root, host, _, _, accessoryFolder, auto, pending ->
+            val file = File(root, "payload.bin").apply {
+                outputStream().use { sink -> repeat(32) { sink.write(ByteArray(256 * 1024)) } }
+            }
+            auto.set(false)
+            val worker = Executors.newSingleThreadExecutor()
+            try {
+                val sending = worker.submit<com.wirelessalien.zipxtract.lan.LanBatchResult> { host.send(listOf(file)) {} }
+                val offer = awaitOffer(pending)
+                assertTrue(offer.decision.complete(accessoryFolder))
+                assertTrue(dataInFlight.await(5, TimeUnit.SECONDS))
+                offer.cancelReceive()
+                continueWriting.countDown()
+                assertEquals("接收端已取消", sending.get(8, TimeUnit.SECONDS).error)
+                assertTrue(accessoryFolder.listFiles().orEmpty().isEmpty())
+                auto.set(true)
+                assertNull(host.send(listOf(file)) {}.error)
+                assertEquals(file.length(), File(accessoryFolder, file.name).length())
+            } finally {
+                continueWriting.countDown()
+                worker.shutdownNow()
+            }
+        }
+    }
+
     private fun awaitOffer(pending: AtomicReference<LanReceiver.Offer?>): LanReceiver.Offer {
         val deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5)
         while (System.nanoTime() < deadline) {
@@ -75,6 +110,7 @@ class UsbTransferDeviceTest {
     }
 
     private fun linked(
+        onHostChunk: () -> Unit = {},
         exercise: (File, UsbTransfer, UsbTransfer, File, File, AtomicBoolean, AtomicReference<LanReceiver.Offer?>) -> Unit
     ) {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
@@ -95,7 +131,12 @@ class UsbTransferDeviceTest {
                             val pipe = object : UsbPipe {
                                 override val host = host
                                 override val input = socket.getInputStream()
-                                override val output = socket.getOutputStream()
+                                override val output = object : FilterOutputStream(socket.getOutputStream()) {
+                                    override fun write(bytes: ByteArray, offset: Int, count: Int) {
+                                        out.write(bytes, offset, count)
+                                        if (host && count >= 256 * 1024) onHostChunk()
+                                    }
+                                }
                                 override fun close() = socket.close()
                             }
                             return UsbTransfer(pipe, { action -> tasks.execute { action() } }, {

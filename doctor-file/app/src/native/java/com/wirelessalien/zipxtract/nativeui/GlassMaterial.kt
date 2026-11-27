@@ -58,7 +58,7 @@ class GlassMaterial(context:Context) {
     fun profile(strength:Float,compact:Boolean=false):Profile=profiles[if(compact)1 else 0][step(strength)]
 
     private val hazeCompatibility = Profile(
-        blurRadius=16f,
+        blurRadius=0f,
         overlayColor=androidx.core.graphics.ColorUtils.setAlphaComponent(palette.surface, 51),
         rimColor=if(dark)0x8ddeecff.toInt() else 0x6a526b8c,
         elevationDp=3f,
@@ -98,7 +98,7 @@ class GlassMaterial(context:Context) {
             state.rimColor=rimColor;state.rim.setStroke(if(style==LiquidGlassStyle.HAZE_DOCK)(density*1.15f).roundToInt().coerceAtLeast(1) else edgeWidth,rimColor)
         }
         if(state.overlayColor!=material.overlayColor){state.overlayColor=material.overlayColor;view.setOverlayColor(material.overlayColor)}
-        if(abs(state.blur-material.blurRadius)>.01f){state.blur=material.blurRadius;view.setBlurRadius(material.blurRadius)}
+        if(abs(state.blur-material.blurRadius)>.01f){state.blur=material.blurRadius;view.setBlurRadius(material.blurRadius.coerceAtLeast(.01f))}
         val elevation=if(opticalShadow)0f else material.elevationDp*density
         if(view.elevation!=elevation)view.elevation=elevation
     }

@@ -106,7 +106,8 @@ internal class LanReceiver(
         val folderCount: Long,
         val rootCount: Long,
         val preview: List<LanPreview>,
-        val decision: CompletableFuture<File?>
+        val decision: CompletableFuture<File?>,
+        val cancelReceive: () -> Unit
     ) {
         val description get() = "$fileCount 个文件" + if (folderCount > 0) "、$folderCount 个文件夹" else ""
     }
@@ -124,6 +125,7 @@ internal class LanReceiver(
         var deadline = SystemClock.elapsedRealtime() + APPROVAL_SECONDS * 1000
         var destination: File? = null
         var uploading = false
+        var uploadInput: InputStream? = null
         var abort: String? = null
     }
 
@@ -132,6 +134,7 @@ internal class LanReceiver(
     private val timer = Executors.newSingleThreadScheduledExecutor()
     private val lock = Any()
     private var active: Session? = null
+    private var receiverCancelled: Pair<String, String>? = null
     val endpoint get() = LanEndpoint(subnet.address, listeningPort)
 
     init {
@@ -197,7 +200,7 @@ internal class LanReceiver(
         }
         val preview = tree?.preview ?: files.values.take(LAN_PREVIEW_SIZE).map { LanPreview(it.name, it.size) }
         onOffer(Offer(session.id, alias.ifBlank { "附近设备" }, peer, tree?.fileCount ?: files.size.toLong(),
-            tree?.folderCount ?: 0, tree?.rootCount ?: files.size.toLong(), preview, session.decision))
+            tree?.folderCount ?: 0, tree?.rootCount ?: files.size.toLong(), preview, session.decision) { cancelReceive(session) })
         val folder = try { session.decision.get(APPROVAL_SECONDS, TimeUnit.SECONDS) }
         catch (_: TimeoutException) { null }
         catch (_: InterruptedException) { null }
@@ -234,6 +237,7 @@ internal class LanReceiver(
             if (state.uploading || state.abort != null || id in state.completedIds) return response(Status.CONFLICT)
             if (bodyLength(request) != item.size + LAN_DIGEST_BYTES) return response(Status.BAD_REQUEST)
             state.uploading = true
+            state.uploadInput = request.inputStream
             state.deadline = SystemClock.elapsedRealtime() + IDLE_MILLIS
             Triple(state, item, target)
         }
@@ -244,6 +248,7 @@ internal class LanReceiver(
                 session.completed.file(receipt.timeWarnings)
                 session.progress.complete(receipt.name, file.size)
                 session.uploading = false
+                session.uploadInput = null
                 if (active === session) {
                     session.completedIds += id
                     if (session.abort != null || session.completedIds.size == session.files.size) finish(session, session.abort)
@@ -265,6 +270,7 @@ internal class LanReceiver(
             if (state.uploading || state.abort != null) return response(Status.CONFLICT)
             if (bodyLength(request) != offer.wireBytes) return response(Status.BAD_REQUEST)
             state.uploading = true
+            state.uploadInput = request.inputStream
             Triple(state, offer, target)
         }
         val error = try {
@@ -286,9 +292,23 @@ internal class LanReceiver(
         session.deadline = SystemClock.elapsedRealtime() + IDLE_MILLIS
     }
 
+    private fun cancelReceive(session: Session) {
+        val stream = synchronized(lock) {
+            if (active !== session) return
+            receiverCancelled = session.peer to session.id
+            abort(session, "接收已取消")
+            session.uploadInput
+        }
+        // Wake a TLS upload blocked while reading; the receiving worker cleans its staging file.
+        runCatching { stream?.close() }
+    }
+
     private fun cancel(request: IHTTPSession, peer: String): Response = synchronized(lock) {
-        val session = active?.takeIf { it.peer == peer && it.id == request.parameter("sessionId") }
-            ?: return response(Status.FORBIDDEN)
+        val id = request.parameter("sessionId")
+        if (receiverCancelled == (peer to id)) {
+            return response(Status.OK, JSONObject().put("receiverCancelled", true))
+        }
+        val session = active?.takeIf { it.peer == peer && it.id == id } ?: return response(Status.FORBIDDEN)
         abort(session, "发送端已取消")
         response(Status.OK)
     }
@@ -429,9 +449,13 @@ internal class LanSender(private val endpoint: LanEndpoint, private val fingerpr
             }
             return completed.result()
         } catch (e: Exception) {
-            session?.let { id -> runCatching { post("/cancel?sessionId=$id", 0, 1500, cleanup = true) {} } }
+            val rejected = session?.let { id ->
+                runCatching { post("/cancel?sessionId=$id", 0, 1500, cleanup = true) {}
+                    .optBoolean("receiverCancelled") }.getOrDefault(false)
+            } == true
             val error = when {
                 cancelled.get() -> "发送已取消"
+                rejected -> "接收端已取消"
                 e is SSLHandshakeException -> "设备身份已变化，请重新选择设备"
                 else -> e.message ?: "发送失败"
             }

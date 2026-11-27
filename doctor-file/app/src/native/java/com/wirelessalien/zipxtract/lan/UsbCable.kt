@@ -11,12 +11,10 @@ import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbDeviceConnection
 import android.hardware.usb.UsbEndpoint
 import android.hardware.usb.UsbManager
+import android.hardware.usb.UsbRequest
 import android.os.Build
 import android.os.ParcelFileDescriptor
 import android.os.SystemClock
-import android.system.Os
-import android.system.OsConstants
-import android.system.StructPollfd
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +26,8 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
+import java.nio.ByteBuffer
+import java.util.concurrent.TimeoutException
 import java.util.concurrent.atomic.AtomicBoolean
 
 /** Maps Android USB roles to a single direct, non-IP FileDoctorC link. */
@@ -236,10 +236,11 @@ internal class UsbCable(
         const val MODEL = "FileDoctorC"
         // Accessory reads consume a USB request at once. Use full 16 KiB blocks even for control frames.
         const val USB_BLOCK = 16 * 1024
+        const val HOST_MAX = 256 * 1024
     }
 
-    private abstract class BulkInput : InputStream() {
-        private val block = ByteArray(USB_BLOCK)
+    private abstract class BulkInput(blockSize: Int = USB_BLOCK) : InputStream() {
+        private val block = ByteArray(blockSize)
         private var at = 0
         private var end = 0
         abstract fun readBlock(destination: ByteArray): Int
@@ -273,10 +274,35 @@ internal class UsbCable(
     ) : UsbPipe {
         private val closed = AtomicBoolean()
         override val host = true
-        override val input: InputStream = object : BulkInput() {
+        private val asyncRead = if (Build.VERSION.SDK_INT >= 28) UsbRequest().let { request ->
+            if (request.initialize(connection, receive)) request else { request.close(); null }
+        } else null
+        private val directRead = if (asyncRead == null) null else ByteBuffer.allocateDirect(HOST_MAX)
+        private var useDirectRead = directRead != null
+
+        override val input: InputStream = object : BulkInput(if (directRead == null) USB_BLOCK else HOST_MAX) {
             override fun readBlock(destination: ByteArray): Int {
+                if (Build.VERSION.SDK_INT >= 28 && useDirectRead && directRead != null && asyncRead != null) {
+                    if (closed.get()) return -1
+                    directRead.clear()
+                    if (runCatching { asyncRead.queue(directRead) }.getOrDefault(false)) {
+                        while (!closed.get()) {
+                            try {
+                                if (connection.requestWait(1000) !== asyncRead) return -1
+                                val count = directRead.position()
+                                directRead.flip()
+                                directRead.get(destination, 0, count)
+                                return count
+                            } catch (_: TimeoutException) {
+                                // Keep the same request queued without discarding bytes already in flight.
+                            }
+                        }
+                        return -1
+                    }
+                    useDirectRead = false
+                }
                 while (!closed.get()) {
-                    val count = connection.bulkTransfer(receive, destination, destination.size, 1000)
+                    val count = connection.bulkTransfer(receive, destination, USB_BLOCK, 1000)
                     if (count > 0) return count
                 }
                 return -1
@@ -288,7 +314,13 @@ internal class UsbCable(
                 var sent = 0
                 while (sent < length) {
                     if (closed.get()) throw IOException("USB 连接已断开")
-                    val amount = minOf(USB_BLOCK, length - sent)
+                    val limit = if (Build.VERSION.SDK_INT >= 28) HOST_MAX else USB_BLOCK
+                    val available = minOf(limit, length - sent)
+                    // AOA gadget reads finish on 16 KiB or a short packet. A final
+                    // packet-aligned fragment would otherwise require a USB ZLP.
+                    val packet = send.maxPacketSize
+                    val amount = if (packet > 1 && available % USB_BLOCK != 0 && available % packet == 0)
+                        available - 1 else available
                     val count = connection.bulkTransfer(send, buffer, offset + sent, amount, 8000)
                     if (count <= 0) throw IOException("USB 写入超时或已断开")
                     sent += count
@@ -296,7 +328,10 @@ internal class UsbCable(
             }
         }
         override fun close() {
-            if (closed.compareAndSet(false, true)) connection.close()
+            if (!closed.compareAndSet(false, true)) return
+            runCatching { asyncRead?.cancel() }
+            connection.close()
+            runCatching { asyncRead?.close() }
         }
     }
 
@@ -304,32 +339,17 @@ internal class UsbCable(
         private val closed = AtomicBoolean()
         private val reader = FileInputStream(descriptor.fileDescriptor)
         private val writer = FileOutputStream(descriptor.fileDescriptor)
-        private val waitForRead = arrayOf(StructPollfd().apply {
-            fd = descriptor.fileDescriptor
-            events = OsConstants.POLLIN.toShort()
-        })
         override val host = false
         override val input: InputStream = object : BulkInput() {
-            override fun readBlock(destination: ByteArray): Int {
-                while (!closed.get()) {
-                    if (Os.poll(waitForRead, 1000) > 0) {
-                        if ((waitForRead[0].revents.toInt() and OsConstants.POLLIN) == 0) return -1
-                        return reader.read(destination)
-                    }
-                }
-                return -1
-            }
+            override fun readBlock(destination: ByteArray): Int =
+                if (closed.get()) -1 else reader.read(destination)
         }
         override val output: OutputStream = object : OutputStream() {
             override fun write(value: Int) = write(byteArrayOf(value.toByte()), 0, 1)
             override fun write(buffer: ByteArray, offset: Int, length: Int) {
-                var sent = 0
-                while (sent < length) {
-                    if (closed.get()) throw IOException("USB 连接已断开")
-                    val amount = minOf(USB_BLOCK, length - sent)
-                    writer.write(buffer, offset + sent, amount)
-                    sent += amount
-                }
+                if (closed.get()) throw IOException("USB 连接已断开")
+                // The gadget driver splits a large write across its own TX requests.
+                writer.write(buffer, offset, length)
             }
         }
 

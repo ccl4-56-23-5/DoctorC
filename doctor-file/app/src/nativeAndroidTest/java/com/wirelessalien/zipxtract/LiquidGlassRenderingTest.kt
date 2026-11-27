@@ -63,8 +63,7 @@ class LiquidGlassRenderingTest{
                 density=a.resources.displayMetrics.density
                 rect=bounds(dock);assertTrue("dock laid out",rect.width()>100&&rect.height()>40)
                 val sourceBounds=bounds(target!!)
-                // Use color bands wider than the 16 dp backdrop blur. The boundary lies
-                // within the Haze rim's 20 dp refraction profile on both ends.
+                // Keep the band boundary within the refraction profile on both ends.
                 val stripeWidth=(48*density).roundToInt()
                 val edgeInset=(9*density).roundToInt()
                 val leftPhase=rect.left-sourceBounds.left+edgeInset
@@ -107,7 +106,7 @@ class LiquidGlassRenderingTest{
                     val original=dominant(before!!.getPixel(x,y));val optical=dominant(after!!.getPixel(x,y))
                     if(abs(original)>=180){
                         clearSamples++
-                        // Equal-channel tint, Gaussian frosting and white highlights cannot swap red/cyan sign.
+                        // Equal-channel tint and white highlights cannot swap red/cyan sign.
                         // Light-mode grading compresses channel contrast before the tint.
                         if(abs(optical)>=22&&original*optical<0)changed.add(distance)
                     }
@@ -157,7 +156,7 @@ class LiquidGlassRenderingTest{
         }
     }
 
-    @Test fun glassBodyGaussianSuppressesFineBackgroundDetailOnTheActualGpu(){
+    @Test fun glassCenterKeepsFineBackgroundDetailOnTheActualGpu(){
         lateinit var dock:GestureDock;lateinit var dockHost:View;lateinit var target:ViewGroup;lateinit var rect:Rect
         var fixture:View?=null;var before:Bitmap?=null;var after:Bitmap?=null
         val visibility=mutableListOf<Int>()
@@ -197,11 +196,11 @@ class LiquidGlassRenderingTest{
             }
             scenario.onActivity{dockHost.visibility=View.VISIBLE;dock.invalidate()}
             val original=detail(checkNotNull(before))
-            after = waitForFrame("Fine stripe contrast persisted after the glass frame was rendered") {
-                detail(it) < original * .18
+            after = waitForFrame("The tinted center should preserve stripe detail without a blur layer") {
+                (detail(it) / original) in .34..0.96
             }
             scenario.onActivity {
-                assertTrue("Gaussian must run on the GPU lens path", dock.isLiquidGlassRendering)
+                assertTrue("The clear center must run on the GPU lens path", dock.isLiquidGlassRendering)
                 assertNull(dock.liquidGlassFailure)
             }
         }finally{

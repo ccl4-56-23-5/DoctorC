@@ -30,6 +30,7 @@ FileDoctorC 使用 unRAR 组件读取 RAR 文件，其适用限制见 7-Zip 声�
 | [OkHttp](https://github.com/square/okhttp) 与 [Okio](https://github.com/square/okio) | TLS 客户端、按接口绑定的套接字及固定长度流式传输。OkHttp 固定为 4.12.0。 | Apache-2.0 |
 | [NanoHTTPD](https://github.com/NanoHttpd/nanohttpd) | 局域网 HTTP 服务 | [BSD-3-Clause](app/src/main/assets/NanoHTTPD-LICENSE.txt) |
 | [BlurView](https://github.com/Dimezis/BlurView) | 背景模糊 | [Apache-2.0](app/src/main/assets/BlurView-LICENSE.txt) |
+| [AndroidX Media3 ExoPlayer 1.10.1](https://github.com/androidx/media/tree/1.10.1) | 本地视频解封装、轨道选择及倍速播放，实际解码由 Android 提供 | [Apache-2.0](app/src/main/assets/Media3-1.10.1-LICENSE.txt) |
 | [Glide](https://github.com/bumptech/glide) | 图片和缩略图加载 | BSD-2-Clause、Apache-2.0 及其组件许可 |
 | [AndroidX](https://github.com/androidx/androidx) | Android 窗口、列表、相片元数据和组件支持 | Apache-2.0 |
 | [Kotlin](https://github.com/JetBrains/kotlin) 与 [Kotlin Coroutines](https://github.com/Kotlin/kotlinx.coroutines) | 语言工具与异步任务 | Apache-2.0 |

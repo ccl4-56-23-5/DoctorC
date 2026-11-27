@@ -84,7 +84,7 @@ internal class LanTransferPanel(
             if (value == null) return
             if (previous?.title != value.title) title.text = value.title
             if (previous?.progress?.text != value.progress.text) status.text = value.progress.text
-            if (previous?.active != value.active) status.maxLines = if (value.active) 1 else 4
+            if (previous?.active != value.active) status.maxLines = if (value.active) 2 else 4
             val progress = value.progress.percent
             if (previous?.progress?.percent != progress || previous?.id != value.id) {
                 percent.text = progress?.let { "$it%" }.orEmpty()
@@ -93,8 +93,8 @@ internal class LanTransferPanel(
                 if (progress != null) progressBar.setProgress(progress, previous?.id == value.id)
             }
             progressBar.visibility = if (value.active || progress != null) VISIBLE else GONE
-            action.visibility = if (!value.active || sending && !value.cancelling) VISIBLE else GONE
-            action.contentDescription = if (value.active) "取消发送" else "关闭传输结果"
+            action.visibility = if (!value.active || !value.cancelling) VISIBLE else GONE
+            action.contentDescription = if (!value.active) "关闭传输结果" else if (sending) "取消发送" else "取消接收"
         }
     }
 }

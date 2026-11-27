@@ -30,8 +30,7 @@ class FileHandoff(private val context: Context) {
         require(file.isFile) { "分享文件不存在" }
         val uri = (if (preferMediaStore) existingMediaUri(file) else null)
             ?: FileProvider.getUriForFile(context, authority, file, file.name)
-        val mime = MimeTypeMap.getSingleton()
-            .getMimeTypeFromExtension(file.extension.lowercase(Locale.ROOT)) ?: "application/octet-stream"
+        val mime = fileMimeType(file)
         return Outgoing(uri, file.name, mime)
     }
 
@@ -167,5 +166,17 @@ class FileHandoff(private val context: Context) {
             if (folder.parentFile == imports) folder.delete()
             throw e
         }
+    }
+}
+
+internal const val APK_MIME = "application/vnd.android.package-archive"
+
+internal fun fileMimeType(file: File): String {
+    val extension = file.extension.lowercase(Locale.ROOT)
+    return when (extension) {
+        "apk" -> APK_MIME
+        "mkv" -> "video/x-matroska"
+        "heic", "heif" -> "image/$extension"
+        else -> MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension) ?: "application/octet-stream"
     }
 }

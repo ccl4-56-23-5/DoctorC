@@ -92,7 +92,7 @@ abstract class FileActionActivity : Activity() {
         lan.release { BookMigration.discard(file) }
     }
 
-    protected fun transferPanel(): View = LanTransferPanel(this, colors, lan::cancelSend, lan::dismiss).also { panel ->
+    protected fun transferPanel(): View = LanTransferPanel(this, colors, lan::cancel, lan::dismiss).also { panel ->
         scope.launch {
             combine(lan.sending, lan.receiving, ::Pair).collect { (sending, receiving) ->
                 panel.render(sending, receiving)

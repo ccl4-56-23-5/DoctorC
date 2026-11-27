@@ -49,14 +49,14 @@ android {
         applicationId "local.sevenzip.android"
         minSdk 24
         targetSdk 35
-        versionCode 33
-        versionName "1.1.7+32"
+        versionCode 35
+        versionName "1.2.0+34"
         resourceConfigurations += ['en', 'zh-rCN']
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
-            abiFilters "armeabi-v7a", "arm64-v8a", "x86_64"
+            abiFilters "arm64-v8a"
         }
     }
 
@@ -108,6 +108,7 @@ dependencies {
     implementation 'org.nanohttpd:nanohttpd:2.3.1'
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     implementation 'androidx.recyclerview:recyclerview:1.4.0'
+    implementation 'androidx.media3:media3-exoplayer:1.10.1'
     implementation 'com.github.Dimezis:BlurView:version-4.0.0'
 
     implementation 'androidx.core:core-ktx:1.16.0'

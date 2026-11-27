@@ -28,6 +28,8 @@ import java.io.EOFException
 import java.io.File
 import java.io.IOException
 import java.security.MessageDigest
+import java.util.concurrent.atomic.AtomicReference
+import java.util.concurrent.atomic.AtomicBoolean
 
 @RunWith(AndroidJUnit4::class)
 class LanDestinationDeviceTest {
@@ -90,6 +92,37 @@ class LanDestinationDeviceTest {
                 return hash.digest().toList()
             }
             assertEquals(digest(source), digest(File(target, source.name)))
+        }
+    }
+
+    @Test fun receiverCanCancelLanUploadAndAcceptAnotherBatch() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val local = lanSubnets(context).firstOrNull()
+        assumeNotNull(local)
+        val route = checkNotNull(local).copy(network = null)
+        val target = File(folder, "receive-cancel").apply { check(mkdir()) }
+        val source = File(folder, "stream.bin").apply {
+            outputStream().use { stream -> repeat(64) { stream.write(bytes) } }
+        }
+        val identity = LanTls.receiver()
+        val offer = AtomicReference<LanReceiver.Offer>()
+        val cancelFirst = AtomicBoolean(true)
+        LanReceiver(route, identity, {
+            offer.set(it)
+            it.decision.complete(target)
+        }, { _, progress ->
+            if (progress.percent != null && progress.percent > 0 && cancelFirst.compareAndSet(true, false)) {
+                offer.get().cancelReceive()
+            }
+        }, { _, _ -> }).use { receiver ->
+            receiver.start(5000)
+            fun send(file: File) = LanSender(receiver.endpoint, identity.fingerprint, route, true)
+                .send(listOf(file), "FileDoctorC QA") {}
+            assertTrue(send(source).error.orEmpty().startsWith("接收端已取消"))
+            assertTrue(target.listFiles().orEmpty().isEmpty())
+            val small = File(folder, "next.bin").apply { writeBytes(bytes) }
+            assertEquals(null, send(small).error)
+            assertArrayEquals(bytes, File(target, small.name).readBytes())
         }
     }
 

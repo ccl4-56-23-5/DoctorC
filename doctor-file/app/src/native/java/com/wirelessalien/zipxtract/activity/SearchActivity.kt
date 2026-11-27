@@ -46,6 +46,7 @@ import com.wirelessalien.zipxtract.nativeui.LiquidGlassStyle
 import com.wirelessalien.zipxtract.nativeui.LiquidGlassView
 import com.wirelessalien.zipxtract.nativeui.accessible
 import com.wirelessalien.zipxtract.nativeui.dp
+import com.wirelessalien.zipxtract.nativeui.fileMimeType
 import com.wirelessalien.zipxtract.nativeui.iconButton
 import com.wirelessalien.zipxtract.nativeui.label
 import com.wirelessalien.zipxtract.nativeui.menuAnchor
@@ -672,6 +673,19 @@ class SearchActivity : FileActionActivity() {
     }
 
     private fun openResult(file: File, reveal: Boolean = false) {
+        if (!reveal && !file.isDirectory && previewKind(fileMimeType(file)) != null) {
+            val files = adapter.currentList.mapNotNull { if (it.folder) null else it.file }
+            scope.launch {
+                try {
+                    startActivity(MediaPreviewIntent.create(this@SearchActivity, file, files))
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Exception) {
+                    notice("无法预览此文件")
+                }
+            }
+            return
+        }
         setResult(RESULT_OK, Intent().putExtra(EXTRA_RESULT, file.path).putExtra(EXTRA_REVEAL, reveal))
         finish()
     }

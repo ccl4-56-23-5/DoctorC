@@ -6,7 +6,6 @@ uniform float2 materialOrigin;
 uniform float2 materialSize;
 uniform float sampleStep;
 uniform float refractionStrength;
-uniform float sharpEdgeWidth;
 uniform float refractionFoldStrength;
 uniform float ambientResponse;
 uniform float edgeSoftness;
@@ -518,11 +517,6 @@ vec4 main(vec2 coord) {
   if (coverage <= 0.0) return vec4(0.0);
 
   float outputDistToEdge = max(-outputSd, 0.0);
-  float sharpWeight = 1.0;
-  if (sharpEdgeWidth > 0.0) {
-    sharpWeight = 1.0 - smoothstep(sharpEdgeWidth * 0.28, sharpEdgeWidth, outputDistToEdge);
-    if (sharpWeight <= 0.0) return vec4(0.0);
-  }
   float shapeMask = edgeSoftness <= 0.0
     ? 1.0
     : smootherstep(clamp(outputDistToEdge / max(edgeSoftness, 0.0001), 0.0, 1.0));
@@ -582,5 +576,5 @@ vec4 main(vec2 coord) {
   }
 
 
-  return opticalColor.a > 0.0 ? opticalColor * (coverage * sharpWeight) : vec4(0.0);
+  return opticalColor.a > 0.0 ? opticalColor * coverage : vec4(0.0);
 }

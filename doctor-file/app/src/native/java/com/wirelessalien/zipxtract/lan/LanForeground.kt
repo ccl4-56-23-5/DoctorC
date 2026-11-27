@@ -86,6 +86,7 @@ internal class LanForeground(private val context: Context) {
     private val listeners = linkedMapOf<LanSubnet, Listener>()
     private var pendingRoute: LanSubnet? = null
     private var receivingRoute: LanSubnet? = null
+    private var stopReceiving: (() -> Unit)? = null
     private val refreshPoll = Runnable { schedule() }
     private val refresh = Runnable { scope.launch {
         usb.reconcile(device, visible > 0, _sending.value?.active == true || _receiving.value?.active == true)
@@ -187,10 +188,13 @@ internal class LanForeground(private val context: Context) {
         scope.launch(Dispatchers.IO) { cleanup() }
     }
 
-    fun cancelSend(id: String) {
-        val task = _sending.value?.takeIf { it.id == id && it.active && !it.cancelling } ?: return
-        _sending.update { if (it?.id == task.id) it.copy(cancelling = true, progress = LanProgress("正在取消…")) else it }
-        sender?.let { client -> scope.launch(Dispatchers.IO) { client.cancel() } }
+    fun cancel(id: String) {
+        val flow = if (_sending.value?.id == id) _sending else _receiving
+        val task = flow.value?.takeIf { it.id == id && it.active && !it.cancelling } ?: return
+        val cancel = if (flow === _sending) sender?.cancel else stopReceiving
+        if (cancel == null && flow === _receiving) return
+        flow.value = task.copy(cancelling = true, progress = LanProgress("正在取消…"))
+        if (cancel != null) scope.launch(Dispatchers.IO) { cancel() }
     }
 
     fun accept(offer: LanReceiver.Offer, folder: File): Boolean {
@@ -198,7 +202,9 @@ internal class LanForeground(private val context: Context) {
         val previous = _receiving.value
         _receiving.value = LanTask(offer.id, "接收自 ${offer.alias}", LanProgress("正在准备接收…"))
         receivingRoute = pendingRoute
+        stopReceiving = offer.cancelReceive
         if (offer.decision.complete(folder)) return true
+        stopReceiving = null
         receivingRoute = null
         _receiving.value = previous
         return false
@@ -229,6 +235,7 @@ internal class LanForeground(private val context: Context) {
             if (pendingRoute == route) _pending.value?.decision?.complete(null)
             if (receivingRoute == route) {
                 receivingRoute = null
+                stopReceiving = null
                 _receiving.update { if (it?.active == true) {
                     it.finish(LanBatchResult(error = "接收连接已断开或存储权限已关闭", countsConfirmed = false))
                 } else it }
@@ -277,6 +284,7 @@ internal class LanForeground(private val context: Context) {
             if (result.files > 0 || result.folders > 0) EventBus.emit(AppEvent.LanFilesReceived)
             if (_receiving.value?.id == id) {
                 receivingRoute = null
+                stopReceiving = null
                 _receiving.update { if (it?.id == id && it.active) it.finish(result) else it }
                 watchNetwork()
                 schedule()

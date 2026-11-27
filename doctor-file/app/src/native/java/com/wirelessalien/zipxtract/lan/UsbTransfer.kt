@@ -1,7 +1,6 @@
 package com.wirelessalien.zipxtract.lan
 
 import org.json.JSONObject
-import java.io.BufferedOutputStream
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.File
@@ -33,28 +32,32 @@ internal class UsbTransfer(
     private class Sending {
         val id = UUID.randomUUID().toString()
         val cancelled = AtomicBoolean()
+        val stoppedByReceiver = AtomicBoolean()
         val approval = CompletableFuture<Boolean>()
         val result = CompletableFuture<LanBatchResult>()
     }
 
     private class Receiving(val offer: LanReceiver.Offer, val tree: LanTreeOffer) {
         var folder: File? = null
+        val cancelled = AtomicBoolean()
     }
 
     private val closed = AtomicBoolean()
     private val state = Any()
     private val writer = Any()
     private val input = DataInputStream(pipe.input)
-    private val output = DataOutputStream(BufferedOutputStream(pipe.output, 16 * 1024))
+    private val output = DataOutputStream(UsbOutputBuffer(pipe.output))
     private var sending: Sending? = null
     private var receiving: Receiving? = null
     private lateinit var remote: LanDevice
+    private var remoteCanStop = false
 
     fun listen(local: LanDevice, onReady: (UsbPeer) -> Unit) {
         try {
             if (pipe.host) writeHello(local)
             val hello = readControl()
             require(hello.getString("type") == MAGIC)
+            remoteCanStop = hello.optBoolean("stop")
             val shape = LanShape.entries.firstOrNull { it.name == hello.optString("shape") } ?: LanShape.PHONE
             remote = LanDevice(hello.optString("model").cleanName().ifBlank { "USB 设备" },
                 hello.optString("brand").cleanName(), shape)
@@ -71,6 +74,12 @@ internal class UsbTransfer(
                     }
                     "data" -> receive(id)
                     "cancel" -> reject(id)
+                    "stop" -> synchronized(state) {
+                        sending?.takeIf { it.id == id }?.let {
+                            it.stoppedByReceiver.set(true)
+                            it.approval.complete(false)
+                        }
+                    }
                     "result" -> synchronized(state) {
                         sending?.takeIf { it.id == id }?.result?.complete(readResult(frame))
                     }
@@ -109,7 +118,8 @@ internal class UsbTransfer(
                     plan.write(pipeOutput, { checkSend(tx) }, progress)
                     pipeOutput.finish(0)
                 } catch (e: Exception) {
-                    if (!closed.get()) runCatching { pipeOutput.finish(-1) }.onFailure { close() }
+                    if (e is PipeWriteFailed) close()
+                    else if (!closed.get()) runCatching { pipeOutput.finish(-1) }.onFailure { close() }
                     throw e
                 }
             }
@@ -124,8 +134,13 @@ internal class UsbTransfer(
             if (offered && !started && !closed.get()) {
                 runCatching { sendControl(frame("cancel", tx.id)) }.onFailure { close() }
             }
+            if (tx.stoppedByReceiver.get() && started) {
+                val receipt = runCatching { tx.result.get(4, TimeUnit.SECONDS) }.getOrNull()
+                if (receipt != null) return receipt.copy(error = "接收端已取消")
+            }
             if (e is TimeoutException && started) close()
             val error = when {
+                tx.stoppedByReceiver.get() -> "接收端已取消"
                 tx.cancelled.get() -> "发送已取消"
                 closed.get() -> "USB 连接已断开"
                 e is TimeoutException -> "USB 传输等待超时"
@@ -148,7 +163,7 @@ internal class UsbTransfer(
         val receive = synchronized(state) {
             if (sending != null || receiving != null) null else Receiving(
                 LanReceiver.Offer(id, remote.model, "USB 有线", tree.fileCount, tree.folderCount,
-                    tree.rootCount, tree.preview, CompletableFuture()), tree).also { receiving = it }
+                    tree.rootCount, tree.preview, CompletableFuture()) { cancelReceive(id) }, tree).also { receiving = it }
         }
         if (receive == null) {
             sendControl(frame("decision", id).put("accepted", false))
@@ -188,18 +203,47 @@ internal class UsbTransfer(
         }
         val result = try {
             LanTreeDestination.receive(folder, active.tree, body, completed,
-                { if (closed.get()) throw IOException("USB 连接已断开") }, progress)
+                {
+                    if (active.cancelled.get()) throw ReceiveCancelled()
+                    if (closed.get()) throw IOException("USB 连接已断开")
+                }, progress)
             require(body.read() == -1) { "USB 文件内容超出清单长度" }
             completed.result()
+        } catch (_: ReceiveCancelled) {
+            // Keep reading only until the sender's abort marker so this cable can be reused.
+            try {
+                val discard = ByteArray(MAX_PACKET)
+                while (body.read(discard) >= 0) Unit
+            } catch (_: PayloadAborted) {
+                // The next bytes now start a control frame.
+            } catch (e: IOException) {
+                clearReceive(active, completed.result("接收已取消"))
+                throw e
+            }
+            completed.result("接收已取消")
         } catch (_: PayloadAborted) {
-            completed.result("发送端已取消")
+            completed.result(if (active.cancelled.get()) "接收已取消" else "发送端已取消")
         } catch (e: Exception) {
             clearReceive(active, completed.result(e.message ?: "USB 接收失败"))
             throw e
         }
         synchronized(writer) {
-            clearReceive(active, result)
-            writeControl(result.json().put("type", "result").put("id", id))
+            val outcome = if (active.cancelled.get()) result.copy(error = "接收已取消") else result
+            clearReceive(active, outcome)
+            writeControl(outcome.json().put("type", "result").put("id", id))
+        }
+    }
+
+    private fun cancelReceive(id: String) {
+        synchronized(writer) {
+            val active = synchronized(state) { receiving?.takeIf { it.offer.id == id } } ?: return
+            if (!active.cancelled.compareAndSet(false, true)) return
+            if (!remoteCanStop) {
+                clearReceive(active, LanBatchResult(error = "接收已取消", countsConfirmed = false))
+                close()
+                return
+            }
+            runCatching { writeControl(frame("stop", id)) }.onFailure { close() }
         }
     }
 
@@ -208,7 +252,7 @@ internal class UsbTransfer(
             receiving?.takeIf { it.offer.id == id }?.also { receiving = null }
         } ?: return
         active.offer.decision.complete(null)
-        onResult(id, LanBatchResult(error = "发送端已取消", countsConfirmed = false))
+        onResult(id, LanBatchResult(error = if (active.cancelled.get()) "接收已取消" else "发送端已取消", countsConfirmed = false))
     }
 
     private fun clearReceive(active: Receiving, result: LanBatchResult) {
@@ -219,11 +263,12 @@ internal class UsbTransfer(
     }
 
     private fun checkSend(tx: Sending) {
+        if (tx.stoppedByReceiver.get()) throw IOException("接收端已取消")
         if (tx.cancelled.get()) throw IOException("发送已取消")
         if (closed.get()) throw IOException("USB 连接已断开")
     }
 
-    private fun writeHello(local: LanDevice) = sendControl(JSONObject().put("type", MAGIC)
+    private fun writeHello(local: LanDevice) = sendControl(JSONObject().put("type", MAGIC).put("stop", true)
         .put("model", local.model.cleanName()).put("brand", local.brand.cleanName()).put("shape", local.shape.name))
 
     private fun readControl(): JSONObject {
@@ -286,6 +331,42 @@ internal class UsbTransfer(
         fun finish(marker: Int) {
             stream.writeInt(marker)
             stream.flush()
+        }
+    }
+
+    private class ReceiveCancelled : IOException("接收已取消")
+
+    private class PipeWriteFailed(cause: IOException) : IOException(cause.message, cause)
+
+    private class UsbOutputBuffer(private val stream: OutputStream) : OutputStream() {
+        private val buffer = ByteArray(MAX_PACKET)
+        private var used = 0
+
+        override fun write(value: Int) {
+            if (used == buffer.size) flush()
+            buffer[used++] = value.toByte()
+        }
+
+        override fun write(bytes: ByteArray, offset: Int, length: Int) {
+            var copied = 0
+            while (copied < length) {
+                if (used == buffer.size) flush()
+                val count = minOf(buffer.size - used, length - copied)
+                bytes.copyInto(buffer, used, offset + copied, offset + copied + count)
+                used += count
+                copied += count
+            }
+        }
+
+        override fun flush() {
+            if (used == 0) return
+            try {
+                stream.write(buffer, 0, used)
+            } catch (e: IOException) {
+                throw PipeWriteFailed(e)
+            } finally {
+                used = 0
+            }
         }
     }
 
